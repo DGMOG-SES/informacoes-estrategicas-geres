@@ -1,0 +1,37 @@
+INDICADOR;SECAO;NOME;REGRA
+LEITOS_UTI_ADULTO_SUS;Hospitais;Leitos UTI adulto (SUS);CNES-LT QT_SUS, códigos 51, 74-76, 83, 85, 86
+LEITOS_UTI_NEONATAL_SUS;Hospitais;Leitos UTI neonatal (SUS);CNES-LT QT_SUS, códigos 80-82
+LEITOS_UTI_PEDIATRICA_SUS;Hospitais;Leitos UTI pediátrica (SUS);CNES-LT QT_SUS, códigos 52, 77-79
+LEITOS_ENFERMARIA_SUS;Hospitais;Leitos de internação – outros/enfermaria (SUS);CNES-LT QT_SUS, tipos de leito 1, 2, 4, 5, 6, 7
+LEITOS_COMPLEMENTAR_NAO_UTI_SUS;Hospitais;Leitos complementares não UTI (SUS);UCI, unidade intermediária, isolamento; fora do total
+LEITOS_TOTAIS_SUS;Hospitais;Leitos totais (SUS);UTI + enfermaria
+LEITOS_UTI_ADULTO_EXISTENTES;Hospitais;Leitos UTI adulto (existentes);CNES-LT QT_EXIST
+LEITOS_UTI_NEONATAL_EXISTENTES;Hospitais;Leitos UTI neonatal (existentes);CNES-LT QT_EXIST
+LEITOS_UTI_PEDIATRICA_EXISTENTES;Hospitais;Leitos UTI pediátrica (existentes);CNES-LT QT_EXIST
+LEITOS_ENFERMARIA_EXISTENTES;Hospitais;Leitos de enfermaria (existentes);CNES-LT QT_EXIST
+LEITOS_COMPLEMENTAR_NAO_UTI_EXISTENTES;Hospitais;Leitos complementares não UTI (existentes);CNES-LT QT_EXIST
+LEITOS_TOTAIS_EXISTENTES;Hospitais;Leitos totais (existentes);UTI + enfermaria
+PROC_PROMOCAO_PREVENCAO;Hospitais;Ações de promoção e prevenção;Grupo SIGTAP 01: SIA aprovada + AIH por procedimento principal
+PROC_DIAGNOSTICO;Hospitais;Procedimentos com finalidade diagnóstica;Grupo 02: SIA aprovada + AIH
+PROC_CLINICOS;Hospitais;Procedimentos clínicos;Grupo 03: SIA aprovada + AIH
+PROC_CIRURGICOS;Hospitais;Procedimentos cirúrgicos;Grupo 04: SIA aprovada + AIH
+PROC_TRANSPLANTES;Hospitais;Transplantes de órgãos, tecidos e células;Grupo 05: SIA aprovada + AIH
+PROC_OPM;Hospitais;Órteses, próteses e materiais especiais;Grupo 07: SIA aprovada + atos de OPM nas AIH (SIH-SP)
+PROC_OCI;Hospitais;Ofertas de cuidados integrados (OCI);Grupo 09: SIA aprovada
+PROC_RADIOTERAPIA;Hospitais;Procedimentos de radioterapia;Forma de organização 03.04.01
+PROC_HEMODIALISE;Hospitais;Procedimentos de hemodiálise;Forma de organização 03.05.01 (tratamento dialítico)
+PROC_TOTAL;Hospitais;Total de procedimentos;Soma dos grupos 01, 02, 03, 04, 05, 07 e 09
+CONSULTAS_MEDICAS;UPAE/UPA;Consultas médicas;SIA: consultas/atendimentos 0301 com CBO médico (225*, 2231*)
+CONSULTAS_NIVEL_SUPERIOR_NAO_MEDICO;UPAE/UPA;Consultas de nível superior (não médicos);SIA: consultas/atendimentos 0301 com CBO de nível superior não médico
+CONSULTAS_TOTAL;UPAE/UPA;Total de consultas;Médicas + nível superior não médico
+ACOLHIMENTO_CLASSIFICACAO_RISCO;UPAE/UPA;Acolhimento com classificação de risco;SIA 0301060118 (não entra no total de consultas)
+CIRURGIAS_ELETIVAS;Cirurgias eletivas;Cirurgias eletivas;AIH grupo 04, caráter eletivo (01), AIH normal; BASE_MUNICIPIO = ATENDIMENTO (local) ou RESIDENCIA (paciente)
+PARTO_NORMAL;Partos;Partos normais;AIH 0310010039, 0310010055
+PARTO_NORMAL_ALTO_RISCO;Partos;Partos normais em gestação de alto risco;AIH 0310010047
+CESARIANA;Partos;Operações cesarianas;AIH 0411010034
+CESARIANA_ALTO_RISCO;Partos;Cesarianas em gestação de alto risco;AIH 0411010026
+CESARIANA_LAQUEADURA;Partos;Cesarianas com laqueadura tubária;AIH 0411010042
+PARTOS_TOTAL;Partos;Total de partos;Soma dos partos acima
+EXAMES_TOMOGRAFIA;Exames de alta complexidade;Tomografias computadorizadas;SIA subgrupo 02.06, aprovada
+EXAMES_RESSONANCIA;Exames de alta complexidade;Ressonâncias magnéticas;SIA subgrupo 02.07, aprovada
+EXAMES_DENSITOMETRIA;Exames de alta complexidade;Densitometrias ósseas;SIA 0204060028, aprovada
