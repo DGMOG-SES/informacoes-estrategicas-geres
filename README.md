@@ -10,6 +10,7 @@ de Saúde de PE. Os dados vêm do FTP do DATASUS e são atualizados pelo GitHub 
 | `cnes_candidatos.R` | Gera a lista candidata de estabelecimentos da rede própria estadual (hospitais, UPAEs, UPAs) a partir do CNES-ST, com leitos SUS por categoria (CNES-LT) e Região de Saúde |
 | `utils.R` | Funções comuns (FTP, leitura de .dbc, gravação) |
 | `referencias/municipios_regiao_saude_pe.csv` | Município → Região de Saúde/GERES |
+| `referencias/estabelecimentos_validados.csv` | **Lista oficial validada pela SES (16/10/2026)**: CNES, tipo (HOSPITAL/UPAE/UPA) e vínculo (REDE_PROPRIA_ESTADUAL, ESTADUAL_ADM_INDIRETA, REFERENCIA_FORA_DA_REDE). Editar este arquivo para incluir ou retirar unidades. |
 | `dados/referencias/cnes_candidatos.csv` | Lista candidata (para validação da SES) |
 | `dados/referencias/leitos_pe.csv` | Leitos de PE por CNES e código de leito (QT_EXIST, QT_CONTR, QT_SUS, QT_NSUS) |
 
