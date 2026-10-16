@@ -11,6 +11,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: publicar-dados
+  cancel-in-progress: false
+
 jobs:
   candidatos:
     runs-on: ubuntu-latest

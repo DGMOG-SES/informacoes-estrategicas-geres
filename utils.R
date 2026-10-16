@@ -83,3 +83,34 @@ ler_arquivo <- function(caminho) {
   }
   setDT(df)
 }
+
+# ---- Leitos (CNES-LT) ------------------------------------------------------------
+
+# Leitos de UTI por código CNES (TP_LEITO 3 = complementar). Os demais
+# complementares (UCI, unidade intermediária, isolamento) ficam em coluna própria,
+# porque não são UTI nem enfermaria. TP_LEITO 1, 2, 4, 5, 6 e 7 = enfermaria.
+UTI <- list(
+  adulto     = c("51", "74", "75", "76", "83", "85", "86"),
+  pediatrica = c("52", "77", "78", "79"),
+  neonatal   = c("80", "81", "82")
+)
+
+categoria_leito <- function(tp, cod) {
+  fcase(cod %chin% UTI$adulto, "UTI_ADULTO",
+        cod %chin% UTI$pediatrica, "UTI_PEDIATRICA",
+        cod %chin% UTI$neonatal, "UTI_NEONATAL",
+        tp == "3", "COMPLEMENTAR_NAO_UTI",
+        default = "ENFERMARIA")
+}
+
+# Lista os arquivos <prefixo>AAMM.dbc de um diretório do FTP do DATASUS.
+listar_competencias <- function(url, prefixo) {
+  res <- com_tentativas(function() curl_fetch_memory(url, handle = novo_handle()),
+                        paste("listar", url))
+  lst <- interpretar_listagem(strsplit(rawToChar(res$content), "\r?\n")[[1]])
+  padrao <- sprintf("^%s(\\d{2})(\\d{2})\\.dbc$", prefixo)
+  lst <- lst[grepl(padrao, nome, ignore.case = TRUE)]
+  lst[, competencia := sub(padrao, "20\\1\\2", nome, ignore.case = TRUE)]
+  setorder(lst, competencia)
+  lst
+}
