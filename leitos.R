@@ -32,13 +32,15 @@ processar <- function(nome, competencia) {
   lt <- ler_arquivo(destino)
   unlink(destino)
   lt[, `:=`(QT_SUS = as.integer(QT_SUS), QT_EXIST = as.integer(QT_EXIST))]
-  lt[, CATEGORIA := categoria_leito(as.character(TP_LEITO), as.character(CODLEITO))]
+  lt[, `:=`(CATEGORIA = categoria_leito(as.character(TP_LEITO), as.character(CODLEITO)),
+            COMPETENCIA = competencia)]
   lt[, .(QT_SUS = sum(QT_SUS, na.rm = TRUE), QT_EXIST = sum(QT_EXIST, na.rm = TRUE)),
-     by = .(COMPETENCIA = competencia, CNES, CODUFMUN, CATEGORIA)]
+     by = .(COMPETENCIA, CNES, CODUFMUN, CATEGORIA)]
 }
 
 consolidar <- function() {
   arqs <- list.files(LEITOS$dir, "^leitos_.*\\.csv$", full.names = TRUE)
+  if (!length(arqs)) return(invisible(NULL))
   base <- rbindlist(lapply(arqs, fread, colClasses = c(COMPETENCIA = "character",
                                                       CNES = "character",
                                                       CODUFMUN = "character")))
