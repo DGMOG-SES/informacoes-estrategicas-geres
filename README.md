@@ -18,6 +18,10 @@ de Saúde de PE. Os dados vêm do FTP do DATASUS e são atualizados pelo GitHub 
 | `dados/referencias/cnes_candidatos.csv` | Lista candidata (para validação da SES) |
 | `dados/referencias/leitos_pe.csv` | Leitos de PE por CNES e código de leito (QT_EXIST, QT_CONTR, QT_SUS, QT_NSUS) |
 
+## Power BI
+
+Passo a passo de conexão, relacionamentos e medidas: [docs/guia_power_bi.md](docs/guia_power_bi.md).
+
 ## Regras
 
 - Rede própria estadual: mantenedora no CNES = Secretaria Estadual de Saúde (CNPJ 10.572.048/0001-28), o que inclui as unidades geridas por OS.
