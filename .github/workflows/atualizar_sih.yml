@@ -56,6 +56,9 @@ jobs:
       - name: Extrair produção
         run: Rscript producao_sih.R ${{ github.event.inputs.argumentos }}
 
+      - name: Gerar indicadores
+        run: Rscript indicadores.R
+
       - name: Publicar no repositório
         if: always()
         run: |

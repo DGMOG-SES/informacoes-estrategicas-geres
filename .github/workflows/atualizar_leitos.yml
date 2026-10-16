@@ -6,6 +6,8 @@ on:
     paths:
       - "leitos.R"
       - "utils.R"
+      - "indicadores.R"
+      - "referencias/dim_indicador.csv"
       - ".github/workflows/atualizar_leitos.yml"
   schedule:
     # Checagem diária (07h37 de Brasília); só baixa quando há competência nova
@@ -54,6 +56,9 @@ jobs:
 
       - name: Extrair leitos
         run: Rscript leitos.R ${{ github.event.inputs.argumentos }}
+
+      - name: Gerar indicadores
+        run: Rscript indicadores.R
 
       - name: Publicar no repositório
         if: always()
