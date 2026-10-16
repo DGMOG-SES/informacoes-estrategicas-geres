@@ -25,7 +25,7 @@ SIA <- list(
   ftp    = "ftp://ftp.datasus.gov.br/dissemin/publicos/SIASUS/200801_/Dados/",
   uf     = "PE",
   inicio = "202201",
-  max_por_execucao = 15,
+  max_por_execucao = 60,
   dir    = file.path(CFG$dir_dados, "sia"),
   controle = file.path(CFG$dir_dados, "controle", "sia_processados.csv"),
   exames = c("0206", "0207", "0204060028")
