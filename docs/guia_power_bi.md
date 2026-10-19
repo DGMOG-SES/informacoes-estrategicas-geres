@@ -27,12 +27,19 @@ cole o código e renomeie a consulta com o nome indicado.
 
 ### f_Indicadores (fato principal)
 
+As tabelas fato são lidas em CSV. O Power BI Report Server não atualiza fontes
+Parquet: na atualização agendada do servidor, só funcionam arquivos baixados com
+`Web.Contents`, como CSV.
+
 ```powerquery
 let
-    Fonte = Parquet.Document(Binary.Buffer(Web.Contents(URL_Base & "indicadores.parquet"))),
-    Tipos = Table.TransformColumnTypes(Fonte, {
+    Fonte = Csv.Document(Web.Contents(URL_Base & "indicadores.csv"),
+        [Delimiter = ";", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Cab = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+    // "en-US": o arquivo usa ponto como separador decimal
+    Tipos = Table.TransformColumnTypes(Cab, {
         {"COMPETENCIA", type text}, {"CNES", type text}, {"CO_MUNICIPIO", type text},
-        {"BASE_MUNICIPIO", type text}, {"INDICADOR", type text}, {"VALOR", type number}}),
+        {"BASE_MUNICIPIO", type text}, {"INDICADOR", type text}, {"VALOR", type number}}, "en-US"),
     Data = Table.AddColumn(Tipos, "Data",
         each #date(Number.From(Text.Start([COMPETENCIA], 4)), Number.From(Text.End([COMPETENCIA], 2)), 1),
         type date)
@@ -44,13 +51,22 @@ in
 
 ```powerquery
 let
-    Fonte = Parquet.Document(Binary.Buffer(Web.Contents(URL_Base & "especialidades.parquet"))),
-    Data = Table.AddColumn(Fonte, "Data",
+    Fonte = Csv.Document(Web.Contents(URL_Base & "especialidades.csv"),
+        [Delimiter = ";", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Cab = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+    Tipos = Table.TransformColumnTypes(Cab, {
+        {"CBO", type text}, {"COMPETENCIA", type text}, {"CNES", type text},
+        {"QTD_APROVADA", type number}, {"CATEGORIA", type text}, {"NO_OCUPACAO", type text}}, "en-US"),
+    Data = Table.AddColumn(Tipos, "Data",
         each #date(Number.From(Text.Start([COMPETENCIA], 4)), Number.From(Text.End([COMPETENCIA], 2)), 1),
         type date)
 in
     Data
 ```
+
+Se você já tinha criado as consultas lendo `.parquet`, abra o *Editor Avançado* de
+cada uma e troque pelo código acima. Os nomes das colunas são os mesmos, então
+medidas e relacionamentos continuam funcionando.
 
 ### Dimensões (CSV)
 
@@ -145,7 +161,8 @@ dentro de *01 Hospitais*.
 
 ### Como colocar a medida na pasta
 
-**Atalho (recomendado): exibição TMDL.** No Power BI Desktop, abra a
+**Atalho: exibição TMDL** (só se a sua versão do Power BI Desktop tiver essa
+exibição; caso contrário, use o caminho *À mão*). No Power BI Desktop, abra a
 *Exibição TMDL* (ícone `</>` na barra da esquerda; se não aparecer, ligue em
 *Opções > Recursos de visualização*). Cole o script do fim desta seção e clique
 em *Aplicar*. Ele cria todas as medidas já com pasta e formato. Rodar de novo
@@ -465,11 +482,20 @@ Visual de *Tabela* com:
 A relação mostra as especialidades que **tiveram produção** no período, não as
 apenas cadastradas.
 
-## 8. Atualização automática no Power BI Service
+## 8. Publicação e atualização no Power BI Report Server
 
-Depois de publicar, em *Configurações do modelo semântico*:
+O painel é feito no **Power BI Desktop otimizado para Report Server**, na mesma
+versão do servidor (maio/2026). Arquivos salvos em uma versão mais nova do
+Desktop não abrem no servidor.
 
-1. *Credenciais da fonte de dados*: método **Anônimo**, nível de privacidade
-   **Público**. Não precisa de gateway, porque a fonte é a internet.
-2. *Atualização agendada*: ligue e escolha um horário depois das 09h. Os
-   workflows do GitHub rodam entre 07h30 e 08h40.
+1. Salve o `.pbix` no portal com *Arquivo > Salvar como > Power BI Report Server*,
+   ou envie o arquivo pelo portal web do servidor.
+2. No portal, abra *Gerenciar* no relatório e vá em *Fontes de dados*. Para cada
+   fonte `Web`, escolha a autenticação **Anônima** e clique em *Testar conexão*.
+3. Ainda em *Gerenciar*, vá em *Atualização agendada*, crie um plano diário e
+   escolha um horário depois das 09h. Os workflows do GitHub rodam entre 07h30
+   e 08h40.
+
+O próprio servidor baixa os arquivos de `raw.githubusercontent.com`. Se o teste
+de conexão falhar, peça à equipe de TI que libere esse endereço no proxy ou
+firewall do servidor.

@@ -6,7 +6,7 @@
 # Saídas em dados/saida/:
 #   indicadores.{parquet,csv}  formato longo: COMPETENCIA, CNES, CO_MUNICIPIO,
 #                              BASE_MUNICIPIO (ATENDIMENTO/RESIDENCIA), INDICADOR, VALOR
-#   especialidades.parquet     CBO com produção de consultas em UPAE/UPA, por mês
+#   especialidades.{parquet,csv} CBO com produção de consultas em UPAE/UPA, por mês
 #   dim_indicador.csv          nome, seção e regra de cada indicador
 #   dim_estabelecimento.csv    lista validada com código de município
 #   dim_municipio.csv          município -> Região de Saúde/GERES
@@ -179,6 +179,8 @@ main <- function() {
     fwrite(sig$ocup, file.path(SAIDA, "dim_ocupacao.csv"), sep = ";", bom = TRUE)
   }
   gravar_atomico(function(f) arrow::write_parquet(esp, f), file.path(SAIDA, "especialidades.parquet"))
+  # CSV para o Power BI Report Server, que não atualiza fontes Parquet
+  gravar_atomico(function(f) fwrite(esp, f, sep = ";", bom = TRUE), file.path(SAIDA, "especialidades.csv"))
   fwrite(estab, file.path(SAIDA, "dim_estabelecimento.csv"), sep = ";", bom = TRUE)
   file.copy("referencias/municipios_regiao_saude_pe.csv", file.path(SAIDA, "dim_municipio.csv"), overwrite = TRUE)
   file.copy("referencias/dim_indicador.csv", file.path(SAIDA, "dim_indicador.csv"), overwrite = TRUE)
