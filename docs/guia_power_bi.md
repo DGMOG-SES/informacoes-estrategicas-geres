@@ -25,7 +25,7 @@ Se o Power BI pedir credencial em qualquer consulta abaixo, escolha **Anônimo**
 Para cada consulta: *Nova fonte > Consulta nula*, abra o *Editor Avançado*,
 cole o código e renomeie a consulta com o nome indicado.
 
-### fIndicadores (fato principal)
+### f_Indicadores (fato principal)
 
 ```powerquery
 let
@@ -40,7 +40,7 @@ in
     Data
 ```
 
-### fEspecialidades (CBO com consultas em UPAE e UPA)
+### f_Especialidades (CBO com consultas em UPAE e UPA)
 
 ```powerquery
 let
@@ -58,9 +58,9 @@ Crie uma consulta para cada arquivo, trocando só o nome do arquivo:
 
 | Consulta | Arquivo |
 |---|---|
-| `dEstabelecimento` | `dim_estabelecimento.csv` |
-| `dMunicipio` | `dim_municipio.csv` |
-| `dIndicador` | `dim_indicador.csv` |
+| `dim_Estabelecimentos` | `dim_estabelecimento.csv` |
+| `dim_Municipios` | `dim_municipio.csv` |
+| `dim_Indicadores` | `dim_indicador.csv` |
 
 ```powerquery
 let
@@ -80,8 +80,8 @@ Clique em *Fechar e Aplicar*.
 *Modelagem > Nova tabela*:
 
 ```dax
-dCalendario =
-VAR _fim = MAX ( fIndicadores[Data] )
+_Calendario =
+VAR _fim = MAX ( f_Indicadores[Data] )
 RETURN
     ADDCOLUMNS (
         CALENDAR ( DATE ( 2022, 1, 1 ), EOMONTH ( _fim, 0 ) ),
@@ -102,16 +102,16 @@ Em *Exibição de modelo*, todos de 1 para muitos, filtro em direção única:
 
 | De (lado 1) | Para (lado muitos) |
 |---|---|
-| `dCalendario[Date]` | `fIndicadores[Data]` |
-| `dCalendario[Date]` | `fEspecialidades[Data]` |
-| `dMunicipio[CO_MUNICIPIO]` | `fIndicadores[CO_MUNICIPIO]` |
-| `dIndicador[INDICADOR]` | `fIndicadores[INDICADOR]` |
-| `dEstabelecimento[CNES]` | `fIndicadores[CNES]` |
-| `dEstabelecimento[CNES]` | `fEspecialidades[CNES]` |
+| `_Calendario[Date]` | `f_Indicadores[Data]` |
+| `_Calendario[Date]` | `f_Especialidades[Data]` |
+| `dim_Municipios[CO_MUNICIPIO]` | `f_Indicadores[CO_MUNICIPIO]` |
+| `dim_Indicadores[INDICADOR]` | `f_Indicadores[INDICADOR]` |
+| `dim_Estabelecimentos[CNES]` | `f_Indicadores[CNES]` |
+| `dim_Estabelecimentos[CNES]` | `f_Especialidades[CNES]` |
 
-**Não ligue `dEstabelecimento` a `dMunicipio`.** A região da unidade já está em
-`dEstabelecimento[REGIAO_SAUDE]`, e uma segunda ligação criaria caminho ambíguo.
-Para filtrar por GERES, use `dMunicipio[REGIAO_SAUDE]`.
+**Não ligue `dim_Estabelecimentos` a `dim_Municipios`.** A região da unidade já está em
+`dim_Estabelecimentos[REGIAO_SAUDE]`, e uma segunda ligação criaria caminho ambíguo.
+Para filtrar por GERES, use `dim_Municipios[REGIAO_SAUDE]`.
 
 ## 5. Medidas
 
@@ -127,24 +127,24 @@ Há dois tipos de indicador:
 
 ```dax
 Valor Fluxo =
-CALCULATE ( SUM ( fIndicadores[VALOR] ), fIndicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
 
 Valor Estoque =
-VAR _ult = CALCULATE ( MAX ( fIndicadores[Data] ), fIndicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" )
+VAR _ult = CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" )
 RETURN
-    CALCULATE ( SUM ( fIndicadores[VALOR] ), fIndicadores[Data] = _ult,
-                fIndicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+    CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[Data] = _ult,
+                f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
 ```
 
 ### Leitos (página Hospitais)
 
 ```dax
-Leitos UTI Adulto SUS = CALCULATE ( [Valor Estoque], fIndicadores[INDICADOR] = "LEITOS_UTI_ADULTO_SUS" )
-Leitos UTI Neo SUS = CALCULATE ( [Valor Estoque], fIndicadores[INDICADOR] = "LEITOS_UTI_NEONATAL_SUS" )
-Leitos UTI Pediátrica SUS = CALCULATE ( [Valor Estoque], fIndicadores[INDICADOR] = "LEITOS_UTI_PEDIATRICA_SUS" )
-Leitos Outros SUS = CALCULATE ( [Valor Estoque], fIndicadores[INDICADOR] = "LEITOS_ENFERMARIA_SUS" )
-Leitos Totais SUS = CALCULATE ( [Valor Estoque], fIndicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" )
-Leitos Totais Existentes = CALCULATE ( [Valor Estoque], fIndicadores[INDICADOR] = "LEITOS_TOTAIS_EXISTENTES" )
+Leitos UTI Adulto SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_ADULTO_SUS" )
+Leitos UTI Neo SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_NEONATAL_SUS" )
+Leitos UTI Pediátrica SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_PEDIATRICA_SUS" )
+Leitos Outros SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_ENFERMARIA_SUS" )
+Leitos Totais SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" )
+Leitos Totais Existentes = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_EXISTENTES" )
 ```
 
 Repita o padrão para `LEITOS_UTI_*_EXISTENTES` e `LEITOS_ENFERMARIA_EXISTENTES`
@@ -152,7 +152,7 @@ se quiser mostrar os existentes ao lado de cada tipo de leito.
 
 ### Procedimentos, consultas, partos e exames
 
-Todos seguem o mesmo padrão: `CALCULATE ( [Valor Fluxo], fIndicadores[INDICADOR] = "<código>" )`.
+Todos seguem o mesmo padrão: `CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "<código>" )`.
 
 | Medida | Código do indicador |
 |---|---|
@@ -184,15 +184,15 @@ Todos seguem o mesmo padrão: `CALCULATE ( [Valor Fluxo], fIndicadores[INDICADOR
 
 ```dax
 Eletivas Realizadas na Região =
-CALCULATE ( SUM ( fIndicadores[VALOR] ),
-    fIndicadores[INDICADOR] = "CIRURGIAS_ELETIVAS", fIndicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+CALCULATE ( SUM ( f_Indicadores[VALOR] ),
+    f_Indicadores[INDICADOR] = "CIRURGIAS_ELETIVAS", f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
 
 Eletivas em Residentes =
-CALCULATE ( SUM ( fIndicadores[VALOR] ),
-    fIndicadores[INDICADOR] = "CIRURGIAS_ELETIVAS", fIndicadores[BASE_MUNICIPIO] = "RESIDENCIA" )
+CALCULATE ( SUM ( f_Indicadores[VALOR] ),
+    f_Indicadores[INDICADOR] = "CIRURGIAS_ELETIVAS", f_Indicadores[BASE_MUNICIPIO] = "RESIDENCIA" )
 ```
 
-Com a segmentação `dMunicipio[REGIAO_SAUDE]` na I GERES, a primeira mostra as
+Com a segmentação `dim_Municipios[REGIAO_SAUDE]` na I GERES, a primeira mostra as
 cirurgias feitas em estabelecimentos da I GERES. A segunda mostra as cirurgias
 de moradores da I GERES, onde quer que tenham sido operados.
 
@@ -200,20 +200,20 @@ de moradores da I GERES, onde quer que tenham sido operados.
 
 ```dax
 Último Mês SIA/SIH =
-FORMAT ( CALCULATE ( MAX ( fIndicadores[Data] ), fIndicadores[INDICADOR] = "PROC_TOTAL", REMOVEFILTERS () ), "mmm/yyyy" )
+FORMAT ( CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "PROC_TOTAL", REMOVEFILTERS () ), "mmm/yyyy" )
 
 Último Mês Leitos =
-FORMAT ( CALCULATE ( MAX ( fIndicadores[Data] ), fIndicadores[INDICADOR] = "LEITOS_TOTAIS_SUS", REMOVEFILTERS () ), "mmm/yyyy" )
+FORMAT ( CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS", REMOVEFILTERS () ), "mmm/yyyy" )
 ```
 
 ## 6. Filtros de cada página
 
 | Página | Filtro no nível da página |
 |---|---|
-| Hospitais da rede própria | `dEstabelecimento[TIPO]` = HOSPITAL e `dEstabelecimento[VINCULO]` = REDE_PROPRIA_ESTADUAL, ESTADUAL_ADM_INDIRETA |
-| UPAEs | `dEstabelecimento[TIPO]` = UPAE |
-| UPAs | `dEstabelecimento[TIPO]` = UPA |
-| Cirurgias eletivas, Partos, Exames | **sem** filtro de estabelecimento: são indicadores de todos os estabelecimentos de PE, filtrados por `dMunicipio[REGIAO_SAUDE]` |
+| Hospitais da rede própria | `dim_Estabelecimentos[TIPO]` = HOSPITAL e `dim_Estabelecimentos[VINCULO]` = REDE_PROPRIA_ESTADUAL, ESTADUAL_ADM_INDIRETA |
+| UPAEs | `dim_Estabelecimentos[TIPO]` = UPAE |
+| UPAs | `dim_Estabelecimentos[TIPO]` = UPA |
+| Cirurgias eletivas, Partos, Exames | **sem** filtro de estabelecimento: são indicadores de todos os estabelecimentos de PE, filtrados por `dim_Municipios[REGIAO_SAUDE]` |
 
 Para ver também os hospitais de referência fora da rede, inclua
 `REFERENCIA_FORA_DA_REDE` no filtro de `VINCULO`.
@@ -222,10 +222,10 @@ Para ver também os hospitais de referência fora da rede, inclua
 
 Visual de *Tabela* com:
 
-- Linhas: `fEspecialidades[NO_OCUPACAO]`
-- Valores: `SUM ( fEspecialidades[QTD_APROVADA] )`
-- Segmentação: `fEspecialidades[CATEGORIA]` (MEDICA ou MULTIPROFISSIONAL)
-- Filtro da página: `dEstabelecimento[TIPO]` = UPAE (ou UPA)
+- Linhas: `f_Especialidades[NO_OCUPACAO]`
+- Valores: `SUM ( f_Especialidades[QTD_APROVADA] )`
+- Segmentação: `f_Especialidades[CATEGORIA]` (MEDICA ou MULTIPROFISSIONAL)
+- Filtro da página: `dim_Estabelecimentos[TIPO]` = UPAE (ou UPA)
 
 A relação mostra as especialidades que **tiveram produção** no período, não as
 apenas cadastradas.
