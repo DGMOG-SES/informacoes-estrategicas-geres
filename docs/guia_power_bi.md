@@ -115,15 +115,54 @@ Para filtrar por GERES, use `dim_Municipios[REGIAO_SAUDE]`.
 
 ## 5. Medidas
 
-Crie uma tabela vazia `Medidas` (*Inserir dados > Carregar*) e adicione as
-medidas abaixo.
+Todas as medidas ficam numa tabela só, `_Medidas`, organizada em pastas que
+seguem as páginas do painel. Crie a tabela em *Página Inicial > Inserir dados*:
+nomeie `_Medidas` e clique em *Carregar*. Depois de criar a primeira medida,
+oculte a coluna `Coluna1`; o Power BI passa a mostrar `_Medidas` no topo do
+painel *Dados*, com ícone de calculadora.
 
-Há dois tipos de indicador:
+### Estrutura de pastas
+
+```text
+_Medidas
+├── 00 Base                         (medidas auxiliares, ocultas)
+├── 01 Hospitais
+│   ├── Leitos SUS
+│   ├── Leitos Existentes
+│   └── Procedimentos
+├── 02 UPAE e UPA
+│   ├── Consultas
+│   └── Especialidades
+├── 03 Cirurgias Eletivas
+├── 04 Partos
+├── 05 Exames
+└── 99 Data da Base
+```
+
+O número na frente mantém as pastas na ordem das páginas. A barra invertida
+cria subpasta: a pasta `01 Hospitais\Leitos SUS` aparece como *Leitos SUS*
+dentro de *01 Hospitais*.
+
+### Como colocar a medida na pasta
+
+**Atalho (recomendado): exibição TMDL.** No Power BI Desktop, abra a
+*Exibição TMDL* (ícone `</>` na barra da esquerda; se não aparecer, ligue em
+*Opções > Recursos de visualização*). Cole o script do fim desta seção e clique
+em *Aplicar*. Ele cria todas as medidas já com pasta e formato. Rodar de novo
+substitui as medidas de mesmo nome, sem duplicar.
+
+**À mão.** Na *Exibição de modelo*, selecione uma ou várias medidas com Ctrl e,
+no painel *Propriedades*, preencha *Pasta de exibição* com o caminho da coluna
+**Pasta** das tabelas abaixo.
+
+### Dois tipos de indicador
 
 - **Fluxo** (procedimentos, consultas, partos, cirurgias, exames): soma os meses
   do período selecionado.
 - **Estoque** (leitos): não se soma no tempo. A medida pega o último mês do
   período selecionado.
+
+### Pasta `00 Base`
 
 ```dax
 Valor Fluxo =
@@ -136,51 +175,67 @@ RETURN
                 f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
 ```
 
-### Leitos (página Hospitais)
+Oculte as duas depois de criar as demais, porque só servem de base.
+
+### Pastas `01 Hospitais\Leitos SUS` e `01 Hospitais\Leitos Existentes`
+
+Padrão: `CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "<código>" )`.
+
+| Medida | Código do indicador | Pasta |
+|---|---|---|
+| Leitos UTI Adulto SUS | `LEITOS_UTI_ADULTO_SUS` | `01 Hospitais\Leitos SUS` |
+| Leitos UTI Neo SUS | `LEITOS_UTI_NEONATAL_SUS` | `01 Hospitais\Leitos SUS` |
+| Leitos UTI Pediátrica SUS | `LEITOS_UTI_PEDIATRICA_SUS` | `01 Hospitais\Leitos SUS` |
+| Leitos Outros SUS | `LEITOS_ENFERMARIA_SUS` | `01 Hospitais\Leitos SUS` |
+| Leitos Totais SUS | `LEITOS_TOTAIS_SUS` | `01 Hospitais\Leitos SUS` |
+| Leitos UTI Adulto Existentes | `LEITOS_UTI_ADULTO_EXISTENTES` | `01 Hospitais\Leitos Existentes` |
+| Leitos UTI Neo Existentes | `LEITOS_UTI_NEONATAL_EXISTENTES` | `01 Hospitais\Leitos Existentes` |
+| Leitos UTI Pediátrica Existentes | `LEITOS_UTI_PEDIATRICA_EXISTENTES` | `01 Hospitais\Leitos Existentes` |
+| Leitos Outros Existentes | `LEITOS_ENFERMARIA_EXISTENTES` | `01 Hospitais\Leitos Existentes` |
+| Leitos Totais Existentes | `LEITOS_TOTAIS_EXISTENTES` | `01 Hospitais\Leitos Existentes` |
+
+### Pastas de procedimentos, consultas, partos e exames
+
+Padrão: `CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "<código>" )`.
+
+| Medida | Código do indicador | Pasta |
+|---|---|---|
+| Promoção e Prevenção | `PROC_PROMOCAO_PREVENCAO` | `01 Hospitais\Procedimentos` |
+| Proc. Diagnósticos | `PROC_DIAGNOSTICO` | `01 Hospitais\Procedimentos` |
+| Proc. Clínicos | `PROC_CLINICOS` | `01 Hospitais\Procedimentos` |
+| Proc. Cirúrgicos | `PROC_CIRURGICOS` | `01 Hospitais\Procedimentos` |
+| Transplantes | `PROC_TRANSPLANTES` | `01 Hospitais\Procedimentos` |
+| OPM | `PROC_OPM` | `01 Hospitais\Procedimentos` |
+| OCI | `PROC_OCI` | `01 Hospitais\Procedimentos` |
+| Radioterapia | `PROC_RADIOTERAPIA` | `01 Hospitais\Procedimentos` |
+| Hemodiálise | `PROC_HEMODIALISE` | `01 Hospitais\Procedimentos` |
+| Total de Procedimentos | `PROC_TOTAL` | `01 Hospitais\Procedimentos` |
+| Consultas Médicas | `CONSULTAS_MEDICAS` | `02 UPAE e UPA\Consultas` |
+| Consultas Nível Superior (não médicos) | `CONSULTAS_NIVEL_SUPERIOR_NAO_MEDICO` | `02 UPAE e UPA\Consultas` |
+| Total de Consultas | `CONSULTAS_TOTAL` | `02 UPAE e UPA\Consultas` |
+| Acolhimento c/ Classificação de Risco | `ACOLHIMENTO_CLASSIFICACAO_RISCO` | `02 UPAE e UPA\Consultas` |
+| Partos Normais | `PARTO_NORMAL` | `04 Partos` |
+| Partos Normais Alto Risco | `PARTO_NORMAL_ALTO_RISCO` | `04 Partos` |
+| Cesarianas | `CESARIANA` | `04 Partos` |
+| Cesarianas Alto Risco | `CESARIANA_ALTO_RISCO` | `04 Partos` |
+| Cesarianas c/ Laqueadura | `CESARIANA_LAQUEADURA` | `04 Partos` |
+| Total de Partos | `PARTOS_TOTAL` | `04 Partos` |
+| Tomografias | `EXAMES_TOMOGRAFIA` | `05 Exames` |
+| Ressonâncias | `EXAMES_RESSONANCIA` | `05 Exames` |
+| Densitometrias | `EXAMES_DENSITOMETRIA` | `05 Exames` |
+
+### Pasta `02 UPAE e UPA\Especialidades`
 
 ```dax
-Leitos UTI Adulto SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_ADULTO_SUS" )
-Leitos UTI Neo SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_NEONATAL_SUS" )
-Leitos UTI Pediátrica SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_PEDIATRICA_SUS" )
-Leitos Outros SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_ENFERMARIA_SUS" )
-Leitos Totais SUS = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" )
-Leitos Totais Existentes = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_EXISTENTES" )
+Especialidades Ofertadas = DISTINCTCOUNT ( f_Especialidades[CBO] )
+
+Produção por Especialidade = SUM ( f_Especialidades[QTD_APROVADA] )
 ```
 
-Repita o padrão para `LEITOS_UTI_*_EXISTENTES` e `LEITOS_ENFERMARIA_EXISTENTES`
-se quiser mostrar os existentes ao lado de cada tipo de leito.
+`Especialidades Ofertadas` conta as ocupações (CBO) com produção no período,
+respeitando os filtros de unidade e de `f_Especialidades[CATEGORIA]`.
 
-### Procedimentos, consultas, partos e exames
-
-Todos seguem o mesmo padrão: `CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "<código>" )`.
-
-| Medida | Código do indicador |
-|---|---|
-| Promoção e Prevenção | `PROC_PROMOCAO_PREVENCAO` |
-| Proc. Diagnósticos | `PROC_DIAGNOSTICO` |
-| Proc. Clínicos | `PROC_CLINICOS` |
-| Proc. Cirúrgicos | `PROC_CIRURGICOS` |
-| Transplantes | `PROC_TRANSPLANTES` |
-| OPM | `PROC_OPM` |
-| OCI | `PROC_OCI` |
-| Radioterapia | `PROC_RADIOTERAPIA` |
-| Hemodiálise | `PROC_HEMODIALISE` |
-| Total de Procedimentos | `PROC_TOTAL` |
-| Consultas Médicas | `CONSULTAS_MEDICAS` |
-| Consultas Nível Superior (não médicos) | `CONSULTAS_NIVEL_SUPERIOR_NAO_MEDICO` |
-| Total de Consultas | `CONSULTAS_TOTAL` |
-| Acolhimento c/ Classificação de Risco | `ACOLHIMENTO_CLASSIFICACAO_RISCO` |
-| Partos Normais | `PARTO_NORMAL` |
-| Partos Normais Alto Risco | `PARTO_NORMAL_ALTO_RISCO` |
-| Cesarianas | `CESARIANA` |
-| Cesarianas Alto Risco | `CESARIANA_ALTO_RISCO` |
-| Cesarianas c/ Laqueadura | `CESARIANA_LAQUEADURA` |
-| Total de Partos | `PARTOS_TOTAL` |
-| Tomografias | `EXAMES_TOMOGRAFIA` |
-| Ressonâncias | `EXAMES_RESSONANCIA` |
-| Densitometrias | `EXAMES_DENSITOMETRIA` |
-
-### Cirurgias eletivas (local de atendimento × residência)
+### Pasta `03 Cirurgias Eletivas` (local de atendimento × residência)
 
 ```dax
 Eletivas Realizadas na Região =
@@ -196,7 +251,7 @@ Com a segmentação `dim_Municipios[REGIAO_SAUDE]` na I GERES, a primeira mostra
 cirurgias feitas em estabelecimentos da I GERES. A segunda mostra as cirurgias
 de moradores da I GERES, onde quer que tenham sido operados.
 
-### Data da base
+### Pasta `99 Data da Base`
 
 ```dax
 Último Mês SIA/SIH =
@@ -205,6 +260,185 @@ FORMAT ( CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "PR
 Último Mês Leitos =
 FORMAT ( CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS", REMOVEFILTERS () ), "mmm/yyyy" )
 ```
+
+### Script TMDL (todas as medidas com pasta)
+
+Cole na *Exibição TMDL* com a tabela `_Medidas` já criada e clique em *Aplicar*.
+A indentação precisa ser com **tabulação**; se o editor reclamar, selecione tudo
+e use *Shift+Tab* / *Tab* para refazer o recuo.
+
+```tmdl
+createOrReplace
+
+	ref table _Medidas
+
+		measure 'Valor Fluxo' = CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+			formatString: #,0
+			displayFolder: 00 Base
+			isHidden
+
+		measure 'Valor Estoque' = VAR _ult = CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" ) RETURN CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[Data] = _ult, f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+			formatString: #,0
+			displayFolder: 00 Base
+			isHidden
+
+		measure 'Leitos UTI Adulto SUS' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_ADULTO_SUS" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos SUS
+
+		measure 'Leitos UTI Neo SUS' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_NEONATAL_SUS" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos SUS
+
+		measure 'Leitos UTI Pediátrica SUS' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_PEDIATRICA_SUS" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos SUS
+
+		measure 'Leitos Outros SUS' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_ENFERMARIA_SUS" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos SUS
+
+		measure 'Leitos Totais SUS' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos SUS
+
+		measure 'Leitos UTI Adulto Existentes' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_ADULTO_EXISTENTES" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos Existentes
+
+		measure 'Leitos UTI Neo Existentes' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_NEONATAL_EXISTENTES" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos Existentes
+
+		measure 'Leitos UTI Pediátrica Existentes' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_UTI_PEDIATRICA_EXISTENTES" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos Existentes
+
+		measure 'Leitos Outros Existentes' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_ENFERMARIA_EXISTENTES" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos Existentes
+
+		measure 'Leitos Totais Existentes' = CALCULATE ( [Valor Estoque], f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_EXISTENTES" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Leitos Existentes
+
+		measure 'Promoção e Prevenção' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_PROMOCAO_PREVENCAO" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'Proc. Diagnósticos' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_DIAGNOSTICO" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'Proc. Clínicos' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_CLINICOS" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'Proc. Cirúrgicos' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_CIRURGICOS" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'Transplantes' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_TRANSPLANTES" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'OPM' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_OPM" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'OCI' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_OCI" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'Radioterapia' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_RADIOTERAPIA" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'Hemodiálise' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_HEMODIALISE" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'Total de Procedimentos' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PROC_TOTAL" )
+			formatString: #,0
+			displayFolder: 01 Hospitais\Procedimentos
+
+		measure 'Consultas Médicas' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "CONSULTAS_MEDICAS" )
+			formatString: #,0
+			displayFolder: 02 UPAE e UPA\Consultas
+
+		measure 'Consultas Nível Superior (não médicos)' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "CONSULTAS_NIVEL_SUPERIOR_NAO_MEDICO" )
+			formatString: #,0
+			displayFolder: 02 UPAE e UPA\Consultas
+
+		measure 'Total de Consultas' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "CONSULTAS_TOTAL" )
+			formatString: #,0
+			displayFolder: 02 UPAE e UPA\Consultas
+
+		measure 'Acolhimento c/ Classificação de Risco' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "ACOLHIMENTO_CLASSIFICACAO_RISCO" )
+			formatString: #,0
+			displayFolder: 02 UPAE e UPA\Consultas
+
+		measure 'Partos Normais' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PARTO_NORMAL" )
+			formatString: #,0
+			displayFolder: 04 Partos
+
+		measure 'Partos Normais Alto Risco' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PARTO_NORMAL_ALTO_RISCO" )
+			formatString: #,0
+			displayFolder: 04 Partos
+
+		measure 'Cesarianas' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "CESARIANA" )
+			formatString: #,0
+			displayFolder: 04 Partos
+
+		measure 'Cesarianas Alto Risco' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "CESARIANA_ALTO_RISCO" )
+			formatString: #,0
+			displayFolder: 04 Partos
+
+		measure 'Cesarianas c/ Laqueadura' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "CESARIANA_LAQUEADURA" )
+			formatString: #,0
+			displayFolder: 04 Partos
+
+		measure 'Total de Partos' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "PARTOS_TOTAL" )
+			formatString: #,0
+			displayFolder: 04 Partos
+
+		measure 'Tomografias' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "EXAMES_TOMOGRAFIA" )
+			formatString: #,0
+			displayFolder: 05 Exames
+
+		measure 'Ressonâncias' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "EXAMES_RESSONANCIA" )
+			formatString: #,0
+			displayFolder: 05 Exames
+
+		measure 'Densitometrias' = CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "EXAMES_DENSITOMETRIA" )
+			formatString: #,0
+			displayFolder: 05 Exames
+
+		measure 'Especialidades Ofertadas' = DISTINCTCOUNT ( f_Especialidades[CBO] )
+			formatString: #,0
+			displayFolder: 02 UPAE e UPA\Especialidades
+
+		measure 'Produção por Especialidade' = SUM ( f_Especialidades[QTD_APROVADA] )
+			formatString: #,0
+			displayFolder: 02 UPAE e UPA\Especialidades
+
+		measure 'Eletivas Realizadas na Região' = CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[INDICADOR] = "CIRURGIAS_ELETIVAS", f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+			formatString: #,0
+			displayFolder: 03 Cirurgias Eletivas
+
+		measure 'Eletivas em Residentes' = CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[INDICADOR] = "CIRURGIAS_ELETIVAS", f_Indicadores[BASE_MUNICIPIO] = "RESIDENCIA" )
+			formatString: #,0
+			displayFolder: 03 Cirurgias Eletivas
+
+		measure 'Último Mês SIA/SIH' = FORMAT ( CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "PROC_TOTAL", REMOVEFILTERS () ), "mmm/yyyy" )
+			displayFolder: 99 Data da Base
+
+		measure 'Último Mês Leitos' = FORMAT ( CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS", REMOVEFILTERS () ), "mmm/yyyy" )
+			displayFolder: 99 Data da Base
+```
+
+Os leitos existentes não somam com os SUS: são uma visão alternativa da mesma
+capacidade, para mostrar ao lado.
 
 ## 6. Filtros de cada página
 
@@ -223,7 +457,8 @@ Para ver também os hospitais de referência fora da rede, inclua
 Visual de *Tabela* com:
 
 - Linhas: `f_Especialidades[NO_OCUPACAO]`
-- Valores: `SUM ( f_Especialidades[QTD_APROVADA] )`
+- Valores: `[Produção por Especialidade]`
+- Cartão ao lado: `[Especialidades Ofertadas]`
 - Segmentação: `f_Especialidades[CATEGORIA]` (MEDICA ou MULTIPROFISSIONAL)
 - Filtro da página: `dim_Estabelecimentos[TIPO]` = UPAE (ou UPA)
 
