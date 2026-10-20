@@ -182,16 +182,11 @@ no painel *Propriedades*, preencha *Pasta de exibição* com o caminho da coluna
 ### Pasta `00 Base`
 
 ```dax
-Valor Fluxo =
-CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO",
-            REMOVEFILTERS ( dim_Indicadores ) )
+Valor Fluxo = COALESCE(CALCULATE(SUM(f_Indicadores[VALOR]), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO", REMOVEFILTERS(dim_Indicadores)), 0)
 
 Valor Estoque =
-VAR _ult = CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS",
-                       REMOVEFILTERS ( dim_Indicadores ) )
-RETURN
-    CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[Data] = _ult,
-                f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO", REMOVEFILTERS ( dim_Indicadores ) )
+VAR _ult = CALCULATE(MAX(f_Indicadores[Data]), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS", REMOVEFILTERS(dim_Indicadores))
+RETURN COALESCE(CALCULATE(SUM(f_Indicadores[VALOR]), f_Indicadores[Data] = _ult, f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO", REMOVEFILTERS(dim_Indicadores)), 0)
 
 Valor por Indicador =
 CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
@@ -201,7 +196,9 @@ CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATEND
 que têm `dim_Indicadores` no eixo. Sem ele, clicar num grupo de procedimentos
 deixaria (Em branco) os cartões e gráficos de outros indicadores. Use
 `Valor por Indicador` só nos visuais com `dim_Indicadores` no eixo, como o
-gráfico de grupos SIGTAP.
+gráfico de grupos SIGTAP. O `COALESCE` faz as medidas mostrarem 0 em vez de
+(Em branco); nos gráficos de linha, filtre a medida "é maior que 0" para não
+mostrar os meses ainda sem dado.
 
 
 Oculte as três depois de criar as demais, porque só servem de base.
