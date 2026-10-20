@@ -203,8 +203,6 @@ deixaria (Em branco) os cartões e gráficos de outros indicadores. Use
 `Valor por Indicador` só nos visuais com `dim_Indicadores` no eixo, como o
 gráfico de grupos SIGTAP.
 
-```dax
-```
 
 Oculte as três depois de criar as demais, porque só servem de base.
 
