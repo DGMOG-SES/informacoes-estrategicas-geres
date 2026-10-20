@@ -183,16 +183,30 @@ no painel *Propriedades*, preencha *Pasta de exibição* com o caminho da coluna
 
 ```dax
 Valor Fluxo =
-CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO",
+            REMOVEFILTERS ( dim_Indicadores ) )
 
 Valor Estoque =
-VAR _ult = CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" )
+VAR _ult = CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS",
+                       REMOVEFILTERS ( dim_Indicadores ) )
 RETURN
     CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[Data] = _ult,
-                f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+                f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO", REMOVEFILTERS ( dim_Indicadores ) )
+
+Valor por Indicador =
+CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
 ```
 
-Oculte as duas depois de criar as demais, porque só servem de base.
+`REMOVEFILTERS ( dim_Indicadores )` faz cada medida ignorar cliques em visuais
+que têm `dim_Indicadores` no eixo. Sem ele, clicar num grupo de procedimentos
+deixaria (Em branco) os cartões e gráficos de outros indicadores. Use
+`Valor por Indicador` só nos visuais com `dim_Indicadores` no eixo, como o
+gráfico de grupos SIGTAP.
+
+```dax
+```
+
+Oculte as três depois de criar as demais, porque só servem de base.
 
 ### Pastas `01 Hospitais\Leitos SUS` e `01 Hospitais\Leitos Existentes`
 
@@ -289,12 +303,17 @@ createOrReplace
 
 	ref table _Medidas
 
-		measure 'Valor Fluxo' = CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+		measure 'Valor Fluxo' = CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO", REMOVEFILTERS ( dim_Indicadores ) )
 			formatString: #,0
 			displayFolder: 00 Base
 			isHidden
 
-		measure 'Valor Estoque' = VAR _ult = CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS" ) RETURN CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[Data] = _ult, f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+		measure 'Valor Estoque' = VAR _ult = CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS", REMOVEFILTERS ( dim_Indicadores ) ) RETURN CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[Data] = _ult, f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO", REMOVEFILTERS ( dim_Indicadores ) )
+
+		measure 'Valor por Indicador' = CALCULATE ( SUM ( f_Indicadores[VALOR] ), f_Indicadores[BASE_MUNICIPIO] = "ATENDIMENTO" )
+			formatString: #,0
+			displayFolder: 00 Base
+			isHidden
 			formatString: #,0
 			displayFolder: 00 Base
 			isHidden
