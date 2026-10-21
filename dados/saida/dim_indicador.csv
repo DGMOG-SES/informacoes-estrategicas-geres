@@ -3,7 +3,7 @@ LEITOS_UTI_ADULTO_SUS;Hospitais;Leitos UTI adulto (SUS);CNES-LT QT_SUS, códigos
 LEITOS_UTI_NEONATAL_SUS;Hospitais;Leitos UTI neonatal (SUS);CNES-LT QT_SUS, códigos 80-82
 LEITOS_UTI_PEDIATRICA_SUS;Hospitais;Leitos UTI pediátrica (SUS);CNES-LT QT_SUS, códigos 52, 77-79
 LEITOS_ENFERMARIA_SUS;Hospitais;Leitos de internação – outros/enfermaria (SUS);CNES-LT QT_SUS, tipos de leito 1, 2, 4, 5, 6, 7
-LEITOS_COMPLEMENTAR_NAO_UTI_SUS;Hospitais;Leitos complementares não UTI (SUS);UCI, unidade intermediária, isolamento; fora do total
+LEITOS_COMPLEMENTAR_NAO_UTI_SUS;Hospitais;Leitos complementares não UTI (SUS);UCI, unidade intermediária, isolamento. Fora do total
 LEITOS_TOTAIS_SUS;Hospitais;Leitos totais (SUS);UTI + enfermaria
 LEITOS_UTI_ADULTO_EXISTENTES;Hospitais;Leitos UTI adulto (existentes);CNES-LT QT_EXIST
 LEITOS_UTI_NEONATAL_EXISTENTES;Hospitais;Leitos UTI neonatal (existentes);CNES-LT QT_EXIST
