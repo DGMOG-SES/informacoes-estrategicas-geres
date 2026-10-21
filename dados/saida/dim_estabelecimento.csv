@@ -131,7 +131,7 @@
 6895492;CAPS III;OUTRO;OUTROS_PE;Afogados da Ingazeira;X Região de Saúde - PE;"";260010;Centro de Atenção Psicossocial
 0107913;HOSPITAL DE CAMPANHA COVID 19 AMBULATORIO MUNICIPAL;OUTRO;OUTROS_PE;Afrânio;VIII Região de Saúde - PE;"";260020;Hospital geral
 2639238;HOSPITAL MUNICIPAL MARIA COELHO CAVALCANTI RODRIGUES;OUTRO;OUTROS_PE;Afrânio;VIII Região de Saúde - PE;"";260020;Hospital geral
-7772408;MATERNIDADE MUNICIPAL MARIA COELHO CAVALCANTI RODRIGUES;OUTRO;OUTROS_PE;Afrânio;VIII Região de Saúde - PE;"";260020;Outro tipo 61
+7772408;MATERNIDADE MUNICIPAL MARIA COELHO CAVALCANTI RODRIGUES;OUTRO;OUTROS_PE;Afrânio;VIII Região de Saúde - PE;"";260020;Centro de parto normal
 9381317;AMBULATORIO MUNICIPAL DE SAUDE;OUTRO;OUTROS_PE;Afrânio;VIII Região de Saúde - PE;"";260020;Clínica/Centro de especialidade
 4680006;CRVB CLINICA DE REABILITACAO VIVER BEM;OUTRO;OUTROS_PE;Agrestina;IV Região de Saúde - PE;"";260030;Clínica/Centro de especialidade
 9404287;CLINICA TERAPEUTICA FLOR DE CEREJEIRA;OUTRO;OUTROS_PE;Agrestina;IV Região de Saúde - PE;"";260030;Clínica/Centro de especialidade
@@ -200,9 +200,9 @@
 0118540;REVIVER;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
 0298794;CLINICA HOSPITALAR IDEALE;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
 0393037;CLINICA TERAPEUTICA FLORESCER;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
-0515450;CENTRO TERAPEUTICO VITAE LTDA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Outro tipo 83
-0519529;CENTRO DE PARTO NORMAL DE CAMARAGIBE;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Outro tipo 61
-0688142;RELUZIR HOSPITAL PSIQUIATRICO LTDA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Outro tipo 83
+0515450;CENTRO TERAPEUTICO VITAE LTDA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Polo de prevenção e promoção da saúde
+0519529;CENTRO DE PARTO NORMAL DE CAMARAGIBE;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Centro de parto normal
+0688142;RELUZIR HOSPITAL PSIQUIATRICO LTDA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Polo de prevenção e promoção da saúde
 2705842;CENTRO MEDICO HOSPITALAR DE CAMARAGIBE;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital geral
 3795004;CLINICA TERAPEUTICA VIRTUDE LTDA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
 4027752;RECOMECO CLINICA HOSPITALAR;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
@@ -214,7 +214,7 @@
 7880502;CLINICA TERAPEUTICA NOVA ALIANCA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
 8076642;MENTE E VIDA HOSPITAL DE PSIQUIATRIA AVANCADA LTDA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
 8511438;PLENUS HOSPITAL;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
-9540288;CLINICA DE REABILITACAO PASSOS PARA VIDA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Outro tipo 83
+9540288;CLINICA DE REABILITACAO PASSOS PARA VIDA;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Polo de prevenção e promoção da saúde
 9657924;CENTRO TERAPEUTICO RELUZIR;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Hospital especializado
 9772154;CLINICA OPEN MIND;OUTRO;OUTROS_PE;Camaragibe;I Região de Saúde - PE;"";260345;Clínica/Centro de especialidade
 2703386;HOSPITAL CAMOCIM DE SAO FELIX;OUTRO;OUTROS_PE;Camocim de São Félix;IV Região de Saúde - PE;"";260350;Hospital geral
@@ -322,7 +322,7 @@
 0112097;CENTRO DE TRIAGEM E TRATAMENTO PARA O CORONAVIRUS;OUTRO;OUTROS_PE;Jaboatão dos Guararapes;I Região de Saúde - PE;"";260790;Hospital geral
 2352125;JABOATAO IMAGEM;OUTRO;OUTROS_PE;Jaboatão dos Guararapes;I Região de Saúde - PE;"";260790;Clínica/Centro de especialidade
 2432900;HOSPITAL E MATERNIDADE NOSSA SENHORA DE LOURDES;OUTRO;OUTROS_PE;Jaboatão dos Guararapes;I Região de Saúde - PE;"";260790;Hospital geral
-2876671;MATERNIDADE E CENTRO DE PARTO NORMAL RITA BARRADAS;OUTRO;OUTROS_PE;Jaboatão dos Guararapes;I Região de Saúde - PE;"";260790;Outro tipo 61
+2876671;MATERNIDADE E CENTRO DE PARTO NORMAL RITA BARRADAS;OUTRO;OUTROS_PE;Jaboatão dos Guararapes;I Região de Saúde - PE;"";260790;Centro de parto normal
 3059499;HOSPITAL NOSSA SENHORA DA PIEDADE;OUTRO;OUTROS_PE;Jaboatão dos Guararapes;I Região de Saúde - PE;"";260790;Hospital geral
 3207560;HOSPITAL SANTA GENOVEVA;OUTRO;OUTROS_PE;Jaboatão dos Guararapes;I Região de Saúde - PE;"";260790;Hospital geral
 3244075;U E P;OUTRO;OUTROS_PE;Jaboatão dos Guararapes;I Região de Saúde - PE;"";260790;Clínica/Centro de especialidade
@@ -349,7 +349,7 @@
 2638967;HOSPITAL MUNICIPAL JOSE JOSY DUARTE;OUTRO;OUTROS_PE;Lagoa do Ouro;V Região de Saúde - PE;"";260860;Hospital geral
 2353954;UNIDADE MISTA SANTA ROSA;OUTRO;OUTROS_PE;Lagoa dos Gatos;III Região de Saúde - PE;"";260870;Hospital geral
 2639211;HOSPITAL MUNICIPAL JOSE HENRIQUE DE LIMA;OUTRO;OUTROS_PE;Lagoa Grande;VIII Região de Saúde - PE;"";260875;Hospital geral
-0267317;CASA DE PARTO DR GERALDO DE OLIVEIRA PASSOS;OUTRO;OUTROS_PE;Lajedo;V Região de Saúde - PE;"";260880;Outro tipo 61
+0267317;CASA DE PARTO DR GERALDO DE OLIVEIRA PASSOS;OUTRO;OUTROS_PE;Lajedo;V Região de Saúde - PE;"";260880;Centro de parto normal
 2703025;HOSPITAL MARIA DA PENHA DOURADO CAVALCANTE;OUTRO;OUTROS_PE;Lajedo;V Região de Saúde - PE;"";260880;Hospital geral
 4185501;CAPS III DAS PONTES;OUTRO;OUTROS_PE;Limoeiro;II Região de Saúde - PE;"";260890;Centro de Atenção Psicossocial
 6967299;CAPS III AD CAPIBARIBE;OUTRO;OUTROS_PE;Limoeiro;II Região de Saúde - PE;"";260890;Centro de Atenção Psicossocial
@@ -388,7 +388,7 @@
 2715368;UNIDADE MISTA NOSSA SENHORA DA CONCEICAO;OUTRO;OUTROS_PE;Passira;II Região de Saúde - PE;"";261050;Unidade mista
 2516764;HOSPITAL MUNICIPAL DE PAUDALHO;OUTRO;OUTROS_PE;Paudalho;II Região de Saúde - PE;"";261060;Hospital geral
 7347766;REVIVER;OUTRO;OUTROS_PE;Paudalho;II Região de Saúde - PE;"";261060;Clínica/Centro de especialidade
-9578161;CENTRO DE PARTO NORMAL DE PAUDALHO GABRIELLY RAMOS CPNP;OUTRO;OUTROS_PE;Paudalho;II Região de Saúde - PE;"";261060;Outro tipo 61
+9578161;CENTRO DE PARTO NORMAL DE PAUDALHO GABRIELLY RAMOS CPNP;OUTRO;OUTROS_PE;Paudalho;II Região de Saúde - PE;"";261060;Centro de parto normal
 0113816;HOSPITAL PROVISORIO DO PAULISTA COVID 19;OUTRO;OUTROS_PE;Paulista;I Região de Saúde - PE;"";261070;Hospital geral
 0875589;PRONTO ATENDIMENTO PAULISTA;OUTRO;OUTROS_PE;Paulista;I Região de Saúde - PE;"";261070;Pronto-socorro geral
 2349205;PRONTOCLINICA TORRES GALVAO;OUTRO;OUTROS_PE;Paulista;I Região de Saúde - PE;"";261070;Unidade mista
@@ -406,7 +406,7 @@
 9156135;CASA DE SAUDE SAO JOSE;OUTRO;OUTROS_PE;Pesqueira;IV Região de Saúde - PE;"";261090;Hospital geral
 2634090;CENTRO DE SAUDE DE PETROLANDIA;OUTRO;OUTROS_PE;Petrolândia;VI Região de Saúde - PE;"";261100;Clínica/Centro de especialidade
 2711850;HOMUPE;OUTRO;OUTROS_PE;Petrolândia;VI Região de Saúde - PE;"";261100;Hospital geral
-0214299;CENTRO DE PARTO NORMAL MARIA DAS DORES DE SOUZA;OUTRO;OUTROS_PE;Petrolina;VIII Região de Saúde - PE;"";261110;Outro tipo 61
+0214299;CENTRO DE PARTO NORMAL MARIA DAS DORES DE SOUZA;OUTRO;OUTROS_PE;Petrolina;VIII Região de Saúde - PE;"";261110;Centro de parto normal
 2429993;CDI CENTRO DE DIAGNOSTICO CLINICO E POR IMAGEM;OUTRO;OUTROS_PE;Petrolina;VIII Região de Saúde - PE;"";261110;Unidade de apoio diagnose e terapia (SADT)
 2430029;CLINICA DE FRATURAS;OUTRO;OUTROS_PE;Petrolina;VIII Região de Saúde - PE;"";261110;Hospital especializado
 2430118;NEUROCARDIO;OUTRO;OUTROS_PE;Petrolina;VIII Região de Saúde - PE;"";261110;Hospital geral
@@ -567,7 +567,7 @@
 2517124;HOSPITAL SAO FRANCISCO;OUTRO;OUTROS_PE;Serra Talhada;XI Região de Saúde - PE;"";261390;Hospital geral
 2517167;HOSPITAL SANTA MARTA;OUTRO;OUTROS_PE;Serra Talhada;XI Região de Saúde - PE;"";261390;Hospital geral
 3017842;CLINICA DA CRIANCA;OUTRO;OUTROS_PE;Serra Talhada;XI Região de Saúde - PE;"";261390;Hospital especializado
-5544742;CENTRO DE PARTO NORMAL;OUTRO;OUTROS_PE;Serra Talhada;XI Região de Saúde - PE;"";261390;Outro tipo 61
+5544742;CENTRO DE PARTO NORMAL;OUTRO;OUTROS_PE;Serra Talhada;XI Região de Saúde - PE;"";261390;Centro de parto normal
 6822630;CAPS AD III;OUTRO;OUTROS_PE;Serra Talhada;XI Região de Saúde - PE;"";261390;Centro de Atenção Psicossocial
 6995292;CAPS III;OUTRO;OUTROS_PE;Serra Talhada;XI Região de Saúde - PE;"";261390;Centro de Atenção Psicossocial
 7743890;CAPS INFANTIL;OUTRO;OUTROS_PE;Serra Talhada;XI Região de Saúde - PE;"";261390;Centro de Atenção Psicossocial
