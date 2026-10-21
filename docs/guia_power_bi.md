@@ -255,7 +255,7 @@ Padrão: `CALCULATE ( [Valor Fluxo], f_Indicadores[INDICADOR] = "<código>" )`.
 ```dax
 Especialidades Ofertadas = DISTINCTCOUNT ( f_Especialidades[CBO] )
 
-Produção por Especialidade = SUM ( f_Especialidades[QTD_APROVADA] )
+Consultas por Especialidade = SUM ( f_Especialidades[QTD_APROVADA] )
 ```
 
 `Especialidades Ofertadas` conta as ocupações (CBO) com produção no período,
@@ -449,7 +449,7 @@ createOrReplace
 			formatString: #,0
 			displayFolder: 02 UPAE e UPA\Especialidades
 
-		measure 'Produção por Especialidade' = SUM ( f_Especialidades[QTD_APROVADA] )
+		measure 'Consultas por Especialidade' = SUM ( f_Especialidades[QTD_APROVADA] )
 			formatString: #,0
 			displayFolder: 02 UPAE e UPA\Especialidades
 
@@ -488,7 +488,7 @@ Para ver também os hospitais de referência fora da rede, inclua
 Visual de *Tabela* com:
 
 - Linhas: `f_Especialidades[NO_OCUPACAO]`
-- Valores: `[Produção por Especialidade]`
+- Valores: `[Consultas por Especialidade]`
 - Cartão ao lado: `[Especialidades Ofertadas]`
 - Segmentação: `f_Especialidades[CATEGORIA]` (MEDICA ou MULTIPROFISSIONAL)
 - Filtro da página: `dim_Estabelecimentos[TIPO]` = UPAE (ou UPA)
