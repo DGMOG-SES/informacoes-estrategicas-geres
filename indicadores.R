@@ -157,6 +157,8 @@ main <- function() {
   out[[length(out) + 1]] <- linha(ele[, .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV)], "CIRURGIAS_ELETIVAS")
   out[[length(out) + 1]] <- linha(ele[startsWith(MUNIC_RES, "26"), .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_RES)],
                                   "CIRURGIAS_ELETIVAS", base = "RESIDENCIA")
+  out[[length(out) + 1]] <- linha(ele[!startsWith(MUNIC_RES, "26"), .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV)],
+                                  "CIRURGIAS_ELETIVAS_OUTRA_UF")
 
   # Exames de alta complexidade (SIA, todos os estabelecimentos de PE)
   ex <- ler_pq("sia_exames_pe.parquet")

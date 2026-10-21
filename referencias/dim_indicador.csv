@@ -25,7 +25,8 @@ CONSULTAS_MEDICAS;UPAE/UPA;Consultas médicas;SIA: consultas/atendimentos 0301 c
 CONSULTAS_NIVEL_SUPERIOR_NAO_MEDICO;UPAE/UPA;Consultas de nível superior (não médicos);SIA: consultas/atendimentos 0301 com CBO de nível superior não médico
 CONSULTAS_TOTAL;UPAE/UPA;Total de consultas;Médicas + nível superior não médico
 ACOLHIMENTO_CLASSIFICACAO_RISCO;UPAE/UPA;Acolhimento com classificação de risco;SIA 0301060118 (não entra no total de consultas)
-CIRURGIAS_ELETIVAS;Cirurgias eletivas;Cirurgias eletivas;AIH grupo 04, caráter eletivo (01), AIH normal; BASE_MUNICIPIO = ATENDIMENTO (local) ou RESIDENCIA (paciente)
+CIRURGIAS_ELETIVAS;Cirurgias eletivas;Cirurgias eletivas;AIH grupo 04, caráter eletivo (01), AIH normal. BASE_MUNICIPIO = ATENDIMENTO (local) ou RESIDENCIA (paciente)
+CIRURGIAS_ELETIVAS_OUTRA_UF;Cirurgias eletivas;Cirurgias eletivas em residentes de outros estados;Mesma regra de CIRURGIAS_ELETIVAS, só AIHs com município de residência fora de PE. Município = local de atendimento
 PARTO_NORMAL;Partos;Partos normais;AIH 0310010039, 0310010055
 PARTO_NORMAL_ALTO_RISCO;Partos;Partos normais em gestação de alto risco;AIH 0310010047
 CESARIANA;Partos;Operações cesarianas;AIH 0411010034
