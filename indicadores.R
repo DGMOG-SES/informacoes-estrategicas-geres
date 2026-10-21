@@ -38,7 +38,8 @@ TIPOS_CNES <- c("01" = "Posto de saúde", "02" = "Centro de saúde/Unidade bási
                 "20" = "Pronto-socorro geral", "21" = "Pronto-socorro especializado",
                 "22" = "Consultório isolado", "36" = "Clínica/Centro de especialidade",
                 "39" = "Unidade de apoio diagnose e terapia (SADT)", "62" = "Hospital/Dia",
-                "70" = "Centro de Atenção Psicossocial", "73" = "Pronto atendimento")
+                "61" = "Centro de parto normal", "70" = "Centro de Atenção Psicossocial",
+                "73" = "Pronto atendimento", "83" = "Polo de prevenção e promoção da saúde")
 
 # Procedimentos de consulta/atendimento (grupo 0301) usados em UPAE e UPA.
 # Médico ou não médico é decidido pelo CBO do profissional.
