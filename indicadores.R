@@ -5,11 +5,16 @@
 #
 # Saídas em dados/saida/:
 #   indicadores.{parquet,csv}  formato longo: COMPETENCIA, CNES, CO_MUNICIPIO,
-#                              BASE_MUNICIPIO (ATENDIMENTO/RESIDENCIA), INDICADOR, VALOR
+#                              BASE_MUNICIPIO (ATENDIMENTO/RESIDENCIA), INDICADOR, VALOR,
+#                              CO_MUNICIPIO_RES (residência do paciente; só partos,
+#                              eletivas e exames, vazio nos demais)
 #   especialidades.{parquet,csv} CBO com produção de consultas em UPAE/UPA, por mês
 #   dim_indicador.csv          nome, seção e regra de cada indicador
-#   dim_estabelecimento.csv    lista validada com código de município
+#   dim_estabelecimento.csv    lista validada com código de município, mais os demais
+#                              estabelecimentos de PE presentes nos indicadores (VINCULO OUTROS_PE)
 #   dim_municipio.csv          município -> Região de Saúde/GERES
+#   dim_municipio_residencia.csv  municípios de PE, um registro por outra UF e Ignorado,
+#                              para CO_MUNICIPIO_RES
 #   dim_procedimento.csv, dim_ocupacao.csv  nomes do SIGTAP vigente
 #
 # Competência = mês de processamento (SIA: PA_MVM; SIH: ANO_CMPT/MES_CMPT;
@@ -20,6 +25,20 @@ source("utils.R")
 
 SAIDA <- file.path(CFG$dir_dados, "saida")
 FTP_SIGTAP <- "ftp://ftp2.datasus.gov.br/pub/sistemas/tup/downloads/"
+API_CNES <- "https://apidadosabertos.saude.gov.br/cnes/estabelecimentos/"
+CACHE_CNES <- file.path(CFG$dir_dados, "referencias", "cnes_nomes_pe.csv")
+
+UFS <- c("11" = "RO", "12" = "AC", "13" = "AM", "14" = "RR", "15" = "PA", "16" = "AP", "17" = "TO",
+         "21" = "MA", "22" = "PI", "23" = "CE", "24" = "RN", "25" = "PB", "26" = "PE", "27" = "AL",
+         "28" = "SE", "29" = "BA", "31" = "MG", "32" = "ES", "33" = "RJ", "35" = "SP", "41" = "PR",
+         "42" = "SC", "43" = "RS", "50" = "MS", "51" = "MT", "52" = "GO", "53" = "DF")
+
+TIPOS_CNES <- c("01" = "Posto de saúde", "02" = "Centro de saúde/Unidade básica", "04" = "Policlínica",
+                "05" = "Hospital geral", "07" = "Hospital especializado", "15" = "Unidade mista",
+                "20" = "Pronto-socorro geral", "21" = "Pronto-socorro especializado",
+                "22" = "Consultório isolado", "36" = "Clínica/Centro de especialidade",
+                "39" = "Unidade de apoio diagnose e terapia (SADT)", "62" = "Hospital/Dia",
+                "70" = "Centro de Atenção Psicossocial", "73" = "Pronto atendimento")
 
 # Procedimentos de consulta/atendimento (grupo 0301) usados em UPAE e UPA.
 # Médico ou não médico é decidido pelo CBO do profissional.
@@ -77,7 +96,62 @@ baixar_sigtap <- function() {
 # ---- Indicadores -------------------------------------------------------------------
 
 linha <- function(dt, indicador, base = "ATENDIMENTO") {
-  dt[, .(COMPETENCIA, CNES, CO_MUNICIPIO, BASE_MUNICIPIO = base, INDICADOR = indicador, VALOR)]
+  res <- if ("CO_MUNICIPIO_RES" %in% names(dt)) dt$CO_MUNICIPIO_RES else rep(NA_character_, nrow(dt))
+  dt[, .(COMPETENCIA, CNES, CO_MUNICIPIO, BASE_MUNICIPIO = base, INDICADOR = indicador, VALOR,
+         CO_MUNICIPIO_RES = res)]
+}
+
+# Residência: municípios de PE pelo código; outra UF vira "<UF>0000"; vazio ou
+# inválido vira "999999" (Ignorado). Mesmos códigos da dim_municipio_residencia.
+cod_residencia <- function(x, mun_pe) {
+  x <- substr(trimws(x), 1, 6)
+  fcase(x %chin% mun_pe, x,
+        substr(x, 1, 2) %chin% setdiff(names(UFS), "26"), paste0(substr(x, 1, 2), "0000"),
+        default = "999999")
+}
+
+dim_residencia <- function(mun) {
+  pe <- mun[CO_MUNICIPIO != "260000"]
+  pe <- pe[, .(CO_MUNICIPIO_RES = CO_MUNICIPIO, MUNICIPIO_RES = MUNICIPIO, UF_RES = "PE",
+               CO_REGIAO_SAUDE, REGIAO_SAUDE, MACRORREGIAO)]
+  uf <- UFS[names(UFS) != "26"]
+  fora <- data.table(CO_MUNICIPIO_RES = paste0(names(uf), "0000"), MUNICIPIO_RES = paste("Residentes de", uf),
+                     UF_RES = unname(uf), CO_REGIAO_SAUDE = "", REGIAO_SAUDE = "Outro estado", MACRORREGIAO = "Outro estado")
+  ign <- data.table(CO_MUNICIPIO_RES = "999999", MUNICIPIO_RES = "Ignorado", UF_RES = "",
+                    CO_REGIAO_SAUDE = "", REGIAO_SAUDE = "Ignorado", MACRORREGIAO = "Ignorado")
+  rbind(pe, fora, ign)
+}
+
+# Nome e tipo dos estabelecimentos fora da lista validada, pela API de dados
+# abertos do CNES. Só consulta CNES que ainda não estão no cache.
+nomes_cnes <- function(cnes) {
+  vazio <- data.table(CNES = character(), NOME_FANTASIA = character(), CO_TIPO_UNIDADE = character(), STATUS = character())
+  cache <- if (file.exists(CACHE_CNES)) fread(CACHE_CNES, colClasses = "character", encoding = "UTF-8") else vazio
+  # 404 = CNES desativado ou inexistente na API: não consulta de novo
+  novos <- setdiff(cnes, cache[STATUS %chin% c("200", "404")]$CNES)
+  if (length(novos)) {
+    log_msg("API CNES: consultando %d estabelecimentos", length(novos))
+    h <- new_handle(connecttimeout = 20, timeout = 30)
+    res <- list(); falhas <- 0L
+    for (cn in novos) {
+      Sys.sleep(0.2)
+      r <- tryCatch(curl_fetch_memory(paste0(API_CNES, as.integer(cn)), handle = h), error = function(e) NULL)
+      st <- if (is.null(r)) "erro" else as.character(r$status_code)
+      j <- if (st == "200") tryCatch(jsonlite::fromJSON(rawToChar(r$content)), error = function(e) NULL)
+      campo <- function(n) if (is.null(j[[n]])) NA_character_ else as.character(j[[n]])
+      res[[cn]] <- data.table(CNES = cn, NOME_FANTASIA = campo("nome_fantasia"),
+                              CO_TIPO_UNIDADE = sprintf("%02d", as.integer(campo("codigo_tipo_unidade"))), STATUS = st)
+      # API fora do ar: para e tenta de novo na próxima execução
+      falhas <- if (st %chin% c("200", "404")) 0L else falhas + 1L
+      if (falhas >= 10) { log_msg("API CNES: 10 falhas seguidas, interrompendo"); break }
+    }
+    api <- rbindlist(res)
+    api[CO_TIPO_UNIDADE == "NA", CO_TIPO_UNIDADE := NA_character_]
+    cache <- rbind(cache[!CNES %chin% api$CNES], api, fill = TRUE)
+    log_msg("API CNES: %d de %d com nome", sum(api$STATUS == "200"), nrow(api))
+    gravar_atomico(function(f) fwrite(cache, f, sep = ";", bom = TRUE), CACHE_CNES)
+  }
+  cache[CNES %chin% cnes, .(CNES, NOME_FANTASIA, CO_TIPO_UNIDADE)]
 }
 
 main <- function() {
@@ -144,28 +218,33 @@ main <- function() {
   esp[, CATEGORIA := fifelse(eh_medico(CBO), "MEDICA", "MULTIPROFISSIONAL")]
 
   # Partos (AIH normais, todos os estabelecimentos de PE)
+  mun <- fread("referencias/municipios_regiao_saude_pe.csv", sep = ";", colClasses = "character", encoding = "UTF-8")
+  mun_pe <- setdiff(mun$CO_MUNICIPIO, "260000")
   a1 <- aih[IDENT == "1"]
+  a1[, CO_MUNICIPIO_RES := cod_residencia(MUNIC_RES, mun_pe)]
   for (nm in names(PARTOS)) {
     out[[length(out) + 1]] <- linha(a1[PROC_REA %chin% PARTOS[[nm]], .(VALOR = sum(N_AIH)),
-                                       by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV)], nm)
+                                       by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV, CO_MUNICIPIO_RES)], nm)
   }
   out[[length(out) + 1]] <- linha(a1[PROC_REA %chin% unlist(PARTOS), .(VALOR = sum(N_AIH)),
-                                     by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV)], "PARTOS_TOTAL")
+                                     by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV, CO_MUNICIPIO_RES)], "PARTOS_TOTAL")
 
   # Cirurgias eletivas: grupo 04, caráter eletivo, AIH normal
   ele <- a1[startsWith(PROC_REA, "04") & CAR_INT == "01"]
-  out[[length(out) + 1]] <- linha(ele[, .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV)], "CIRURGIAS_ELETIVAS")
-  out[[length(out) + 1]] <- linha(ele[startsWith(MUNIC_RES, "26"), .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_RES)],
+  out[[length(out) + 1]] <- linha(ele[, .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV, CO_MUNICIPIO_RES)], "CIRURGIAS_ELETIVAS")
+  out[[length(out) + 1]] <- linha(ele[startsWith(MUNIC_RES, "26"), .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_RES, CO_MUNICIPIO_RES)],
                                   "CIRURGIAS_ELETIVAS", base = "RESIDENCIA")
-  out[[length(out) + 1]] <- linha(ele[!startsWith(MUNIC_RES, "26"), .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV)],
+  out[[length(out) + 1]] <- linha(ele[!startsWith(MUNIC_RES, "26"), .(VALOR = sum(N_AIH)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = MUNIC_MOV, CO_MUNICIPIO_RES)],
                                   "CIRURGIAS_ELETIVAS_OUTRA_UF")
 
   # Exames de alta complexidade (SIA, todos os estabelecimentos de PE)
   ex <- ler_pq("sia_exames_pe.parquet")
   ex[, COMPETENCIA := PA_MVM]
-  out[[length(out) + 1]] <- linha(ex[startsWith(PA_PROC_ID, "0206"), .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = PA_UFMUN)], "EXAMES_TOMOGRAFIA")
-  out[[length(out) + 1]] <- linha(ex[startsWith(PA_PROC_ID, "0207"), .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = PA_UFMUN)], "EXAMES_RESSONANCIA")
-  out[[length(out) + 1]] <- linha(ex[PA_PROC_ID == "0204060028", .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = PA_UFMUN)], "EXAMES_DENSITOMETRIA")
+  if (!"PA_MUNPCN" %in% names(ex)) ex[, PA_MUNPCN := NA_character_]
+  ex[, CO_MUNICIPIO_RES := cod_residencia(PA_MUNPCN, mun_pe)]
+  out[[length(out) + 1]] <- linha(ex[startsWith(PA_PROC_ID, "0206"), .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = PA_UFMUN, CO_MUNICIPIO_RES)], "EXAMES_TOMOGRAFIA")
+  out[[length(out) + 1]] <- linha(ex[startsWith(PA_PROC_ID, "0207"), .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = PA_UFMUN, CO_MUNICIPIO_RES)], "EXAMES_RESSONANCIA")
+  out[[length(out) + 1]] <- linha(ex[PA_PROC_ID == "0204060028", .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO = PA_UFMUN, CO_MUNICIPIO_RES)], "EXAMES_DENSITOMETRIA")
 
   ind <- rbindlist(out, use.names = TRUE)[VALOR != 0]
   setorder(ind, INDICADOR, COMPETENCIA, CNES)
@@ -183,8 +262,24 @@ main <- function() {
   gravar_atomico(function(f) arrow::write_parquet(esp, f), file.path(SAIDA, "especialidades.parquet"))
   # CSV para o Power BI Report Server, que não atualiza fontes Parquet
   gravar_atomico(function(f) fwrite(esp, f, sep = ";", bom = TRUE), file.path(SAIDA, "especialidades.csv"))
-  fwrite(estab, file.path(SAIDA, "dim_estabelecimento.csv"), sep = ";", bom = TRUE)
+  # Demais estabelecimentos de PE presentes nos indicadores: entram como
+  # OUTROS_PE e TIPO = OUTRO, para não alterar os filtros das páginas da rede própria.
+  outros <- unique(ind[BASE_MUNICIPIO == "ATENDIMENTO" & !CNES %chin% estab$CNES, .(CNES, CO_MUNICIPIO)])
+  outros <- outros[, .(CO_MUNICIPIO = CO_MUNICIPIO[1]), by = CNES]
+  nomes <- tryCatch(nomes_cnes(outros$CNES), error = function(e) {
+    log_msg("API CNES indisponível: %s", conditionMessage(e))
+    data.table(CNES = character(), NOME_FANTASIA = character(), CO_TIPO_UNIDADE = character()) })
+  outros <- merge(outros, nomes, by = "CNES", all.x = TRUE)
+  outros <- merge(outros, mun[, .(CO_MUNICIPIO, MUNICIPIO, REGIAO_SAUDE)], by = "CO_MUNICIPIO", all.x = TRUE)
+  outros[, `:=`(NOME_FANTASIA = fifelse(is.na(NOME_FANTASIA) | NOME_FANTASIA == "", paste("CNES", CNES), NOME_FANTASIA),
+                TIPO = "OUTRO", VINCULO = "OUTROS_PE", OBSERVACAO_SES = "",
+                TIPO_CNES = fcoalesce(unname(TIPOS_CNES[CO_TIPO_UNIDADE]), fifelse(is.na(CO_TIPO_UNIDADE), "Não informado", paste("Outro tipo", CO_TIPO_UNIDADE))))]
+  estab[, TIPO_CNES := fcase(TIPO == "HOSPITAL", "Hospital", TIPO == "UPAE", "UPAE", TIPO == "UPA", "UPA", default = "Outro")]
+  dim_estab <- rbind(estab, outros[, names(estab), with = FALSE])
+  fwrite(dim_estab, file.path(SAIDA, "dim_estabelecimento.csv"), sep = ";", bom = TRUE)
+  log_msg("dim_estabelecimento: %d validados, %d outros de PE", nrow(estab), nrow(outros))
   file.copy("referencias/municipios_regiao_saude_pe.csv", file.path(SAIDA, "dim_municipio.csv"), overwrite = TRUE)
+  fwrite(dim_residencia(mun), file.path(SAIDA, "dim_municipio_residencia.csv"), sep = ";", bom = TRUE)
   file.copy("referencias/dim_indicador.csv", file.path(SAIDA, "dim_indicador.csv"), overwrite = TRUE)
 }
 

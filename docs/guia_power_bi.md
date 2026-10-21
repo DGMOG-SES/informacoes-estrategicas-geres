@@ -39,7 +39,8 @@ let
     // "en-US": o arquivo usa ponto como separador decimal
     Tipos = Table.TransformColumnTypes(Cab, {
         {"COMPETENCIA", type text}, {"CNES", type text}, {"CO_MUNICIPIO", type text},
-        {"BASE_MUNICIPIO", type text}, {"INDICADOR", type text}, {"VALOR", type number}}, "en-US"),
+        {"BASE_MUNICIPIO", type text}, {"INDICADOR", type text}, {"VALOR", type number},
+        {"CO_MUNICIPIO_RES", type text}}, "en-US"),
     Data = Table.AddColumn(Tipos, "Data",
         each #date(Number.From(Text.Start([COMPETENCIA], 4)), Number.From(Text.End([COMPETENCIA], 2)), 1),
         type date)
@@ -76,6 +77,7 @@ Crie uma consulta para cada arquivo, trocando só o nome do arquivo:
 |---|---|
 | `dim_Estabelecimentos` | `dim_estabelecimento.csv` |
 | `dim_Municipios` | `dim_municipio.csv` |
+| `dim_Municipios_Residencia` | `dim_municipio_residencia.csv` |
 | `dim_Indicadores` | `dim_indicador.csv` |
 
 ```powerquery
@@ -121,9 +123,20 @@ Em *Exibição de modelo*, todos de 1 para muitos, filtro em direção única:
 | `_Calendario[Date]` | `f_Indicadores[Data]` |
 | `_Calendario[Date]` | `f_Especialidades[Data]` |
 | `dim_Municipios[CO_MUNICIPIO]` | `f_Indicadores[CO_MUNICIPIO]` |
+| `dim_Municipios_Residencia[CO_MUNICIPIO_RES]` | `f_Indicadores[CO_MUNICIPIO_RES]` |
 | `dim_Indicadores[INDICADOR]` | `f_Indicadores[INDICADOR]` |
 | `dim_Estabelecimentos[CNES]` | `f_Indicadores[CNES]` |
 | `dim_Estabelecimentos[CNES]` | `f_Especialidades[CNES]` |
+
+`f_Indicadores[CO_MUNICIPIO_RES]` é o município de residência do paciente. Só vem
+preenchido em partos, cirurgias eletivas e exames; nos demais indicadores fica vazio.
+Residentes de outros estados aparecem agrupados por UF ("Residentes de BA") e
+residência não informada aparece como "Ignorado".
+
+`dim_Estabelecimentos` traz as 118 unidades validadas e os demais estabelecimentos de
+PE que aparecem nos indicadores, com `VINCULO` = OUTROS_PE e `TIPO` = OUTRO (o tipo
+do CNES fica em `TIPO_CNES`). Os filtros das páginas da rede própria, por `TIPO` e
+`VINCULO`, continuam iguais.
 
 **Não ligue `dim_Estabelecimentos` a `dim_Municipios`.** A região da unidade já está em
 `dim_Estabelecimentos[REGIAO_SAUDE]`, e uma segunda ligação criaria caminho ambíguo.
