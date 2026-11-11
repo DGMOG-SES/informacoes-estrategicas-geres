@@ -294,7 +294,7 @@ main <- function() {
   hash <- paste(tools::md5sum(file.path(SAIDA, c("indicadores.csv", "especialidades.csv"))), collapse = "")
   arq_atu <- file.path(SAIDA, "atualizacao.csv")
   ant <- if (file.exists(arq_atu)) fread(arq_atu, colClasses = "character", encoding = "UTF-8") else NULL
-  data_atu <- if (!is.null(ant) && identical(ant$HASH[1], hash)) ant$ATUALIZADO_EM[1] else format(Sys.Date(), "%Y-%m-%d")
+  data_atu <- if (!is.null(ant) && identical(ant$HASH[1], hash) && nchar(ant$ATUALIZADO_EM[1]) == 16) ant$ATUALIZADO_EM[1] else format(Sys.time(), "%Y-%m-%d %H:%M", tz = "America/Recife")
   atu <- data.table(FONTE = c("CNES", "SIA", "SIH"),
                     ULTIMA_COMPETENCIA = c(max(lt$COMPETENCIA), max(c(sia$PA_MVM, ex$PA_MVM)), max(aih$COMPETENCIA)),
                     ATUALIZADO_EM = data_atu, HASH = hash)
