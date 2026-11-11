@@ -300,6 +300,36 @@ FORMAT ( CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "PR
 FORMAT ( CALCULATE ( MAX ( f_Indicadores[Data] ), f_Indicadores[INDICADOR] = "LEITOS_TOTAIS_SUS", REMOVEFILTERS () ), "mmm/yyyy" )
 ```
 
+#### Data de atualização (`dim_Atualizacao`)
+
+`atualizacao.csv` traz uma linha por fonte (CNES, SIA, SIH) com a última competência
+na base e a data em que a base mudou pela última vez (`ATUALIZADO_EM`, só muda quando
+os dados mudam). Consulta nova, sem relacionamento com as outras tabelas:
+
+```powerquery
+let
+    Fonte = Csv.Document(Web.Contents(URL_Base & "atualizacao.csv"),
+        [Delimiter = ";", Encoding = 65001, QuoteStyle = QuoteStyle.Csv]),
+    Cab = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
+    SemHash = Table.RemoveColumns(Cab, {"HASH"}),
+    Texto = Table.TransformColumnTypes(SemHash, {{"FONTE", type text}, {"ULTIMA_COMPETENCIA", type text}, {"ATUALIZADO_EM", type text}})
+in
+    Texto
+```
+
+```dax
+HTML Data Atualização =
+VAR _sih = LOOKUPVALUE(dim_Atualizacao[ULTIMA_COMPETENCIA], dim_Atualizacao[FONTE], "SIH")
+VAR _sia = LOOKUPVALUE(dim_Atualizacao[ULTIMA_COMPETENCIA], dim_Atualizacao[FONTE], "SIA")
+VAR _cnes = LOOKUPVALUE(dim_Atualizacao[ULTIMA_COMPETENCIA], dim_Atualizacao[FONTE], "CNES")
+VAR _atu = LOOKUPVALUE(dim_Atualizacao[ATUALIZADO_EM], dim_Atualizacao[FONTE], "CNES")
+VAR _dt = DATE(VALUE(LEFT(_atu, 4)), VALUE(MID(_atu, 6, 2)), VALUE(RIGHT(_atu, 2)))
+VAR _txt = "Base atualizada em " & FORMAT(_dt, "dd/mm/yyyy") & "<br>Dados até: SIH " & FORMAT(DATE(VALUE(LEFT(_sih, 4)), VALUE(RIGHT(_sih, 2)), 1), "mmm/yyyy") & " · SIA " & FORMAT(DATE(VALUE(LEFT(_sia, 4)), VALUE(RIGHT(_sia, 2)), 1), "mmm/yyyy") & " · CNES " & FORMAT(DATE(VALUE(LEFT(_cnes, 4)), VALUE(RIGHT(_cnes, 2)), 1), "mmm/yyyy")
+RETURN "<div style='font-family:Segoe UI;font-size:12px;color:#5C6E73;text-align:right;'>" & _txt & "</div>"
+```
+
+Use a medida num visual *HTML Content* no cabeçalho de cada página.
+
 ### Script TMDL (todas as medidas com pasta)
 
 Cole na *Exibição TMDL* com a tabela `_Medidas` já criada e clique em *Aplicar*.
