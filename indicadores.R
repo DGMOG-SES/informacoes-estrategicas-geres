@@ -256,10 +256,15 @@ main <- function() {
   # Dimensões
   sig <- tryCatch(baixar_sigtap(), error = function(e) { log_msg("SIGTAP indisponível: %s", conditionMessage(e)); NULL })
   if (!is.null(sig)) {
-    esp <- merge(esp, sig$ocup, by = "CBO", all.x = TRUE)
+    ocup <- sig$ocup
     fwrite(sig$proc, file.path(SAIDA, "dim_procedimento.csv"), sep = ";", bom = TRUE)
-    fwrite(sig$ocup, file.path(SAIDA, "dim_ocupacao.csv"), sep = ";", bom = TRUE)
+    fwrite(ocup, file.path(SAIDA, "dim_ocupacao.csv"), sep = ";", bom = TRUE)
+  } else {
+    # Sem SIGTAP, usa os nomes da execução anterior: a coluna NO_OCUPACAO não pode
+    # sumir, porque o Power BI tipa as colunas pelo nome.
+    ocup <- fread(file.path(SAIDA, "dim_ocupacao.csv"), colClasses = "character", encoding = "UTF-8")[, .(CBO, NO_OCUPACAO)]
   }
+  esp <- merge(esp, ocup, by = "CBO", all.x = TRUE)
   gravar_atomico(function(f) arrow::write_parquet(esp, f), file.path(SAIDA, "especialidades.parquet"))
   # CSV para o Power BI Report Server, que não atualiza fontes Parquet
   gravar_atomico(function(f) fwrite(esp, f, sep = ";", bom = TRUE), file.path(SAIDA, "especialidades.csv"))
