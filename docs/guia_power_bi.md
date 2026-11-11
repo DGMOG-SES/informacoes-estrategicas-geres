@@ -333,9 +333,10 @@ Use a medida num visual *HTML Content* no cabeçalho de cada página.
 Rodapé da página inicial (`ATUALIZADO_EM` vem como `aaaa-mm-dd hh:mm`, horário de Recife):
 
 ```dax
-Texto Atualizado Em =
+HTML Atualizado Em =
 VAR _atu = LOOKUPVALUE(dim_Atualizacao[ATUALIZADO_EM], dim_Atualizacao[FONTE], "CNES")
-RETURN "Atualizado em " & MID(_atu, 9, 2) & "/" & MID(_atu, 6, 2) & "/" & LEFT(_atu, 4) & " às " & MID(_atu, 12, 5)
+VAR _txt = "Atualizado em " & MID(_atu, 9, 2) & "/" & MID(_atu, 6, 2) & "/" & LEFT(_atu, 4) & " às " & MID(_atu, 12, 5)
+RETURN "<div style=""font-family:'Courier New';font-size:16pt;color:#ffffff;text-decoration:underline;text-underline-offset:2px;text-align:right;"">" & _txt & "</div>"
 ```
 
 ### Script TMDL (todas as medidas com pasta)
