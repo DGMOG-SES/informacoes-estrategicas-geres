@@ -16,6 +16,7 @@
 #   dim_municipio_residencia.csv  municípios de PE, um registro por outra UF e Ignorado,
 #                              para CO_MUNICIPIO_RES
 #   dim_procedimento.csv, dim_ocupacao.csv  nomes do SIGTAP vigente
+#   atualizacao.csv            último mês de cada fonte e data em que a base mudou
 #
 # Competência = mês de processamento (SIA: PA_MVM; SIH: ANO_CMPT/MES_CMPT;
 # CNES: competência do arquivo). Quantidades do SIA = aprovadas (PA_QTDAPR).
@@ -287,6 +288,17 @@ main <- function() {
   file.copy("referencias/municipios_regiao_saude_pe.csv", file.path(SAIDA, "dim_municipio.csv"), overwrite = TRUE)
   fwrite(dim_residencia(mun), file.path(SAIDA, "dim_municipio_residencia.csv"), sep = ";", bom = TRUE)
   file.copy("referencias/dim_indicador.csv", file.path(SAIDA, "dim_indicador.csv"), overwrite = TRUE)
+
+  # Data de atualização: só muda quando o conteúdo das tabelas fato muda, para
+  # não gerar commit diário sem dado novo.
+  hash <- paste(tools::md5sum(file.path(SAIDA, c("indicadores.csv", "especialidades.csv"))), collapse = "")
+  arq_atu <- file.path(SAIDA, "atualizacao.csv")
+  ant <- if (file.exists(arq_atu)) fread(arq_atu, colClasses = "character", encoding = "UTF-8") else NULL
+  data_atu <- if (!is.null(ant) && identical(ant$HASH[1], hash)) ant$ATUALIZADO_EM[1] else format(Sys.Date(), "%Y-%m-%d")
+  atu <- data.table(FONTE = c("CNES", "SIA", "SIH"),
+                    ULTIMA_COMPETENCIA = c(max(lt$COMPETENCIA), max(c(sia$PA_MVM, ex$PA_MVM)), max(aih$COMPETENCIA)),
+                    ATUALIZADO_EM = data_atu, HASH = hash)
+  fwrite(atu, arq_atu, sep = ";", bom = TRUE)
 }
 
 if (sys.nframe() == 0L) main()
