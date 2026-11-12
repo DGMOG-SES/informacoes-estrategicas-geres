@@ -8,7 +8,7 @@
 #                              BASE_MUNICIPIO (ATENDIMENTO/RESIDENCIA), INDICADOR, VALOR,
 #                              CO_MUNICIPIO_RES (residência do paciente; só partos,
 #                              eletivas e exames, vazio nos demais)
-#   especialidades.{parquet,csv} CBO com produção de consultas em hospitais, UPAE e UPA, por mês
+#   especialidades.{parquet,csv} CBO com produção de consultas em hospitais, UPAE e UPA e atos de internação (SIH-SP) nos hospitais, por mês
 #   dim_indicador.csv          nome, seção e regra de cada indicador
 #   dim_estabelecimento.csv    lista validada com código de município, mais os demais
 #                              estabelecimentos de PE presentes nos indicadores (VINCULO OUTROS_PE)
@@ -218,6 +218,11 @@ main <- function() {
   esp <- cons[eh_medico(CBO) | eh_superior_nao_medico(CBO),
               .(QTD_APROVADA = sum(QTD_APROVADA)),
               by = .(COMPETENCIA, CNES, CBO, TIPO_ATENDIMENTO = fifelse(startsWith(PA_PROC_ID, "030106"), "URGENCIA", "CONSULTA"))]
+  # Internação nos hospitais: atos profissionais do SIH (SP) pelo CBO de quem fez o ato.
+  esp_int <- sp[CNES %chin% hosp & (eh_medico(CBO) | eh_superior_nao_medico(CBO)),
+                .(QTD_APROVADA = sum(QTD_ATO)), by = .(COMPETENCIA, CNES, CBO)]
+  esp_int[, TIPO_ATENDIMENTO := "INTERNACAO"]
+  esp <- rbind(esp, esp_int, use.names = TRUE)
   esp[, CATEGORIA := fifelse(eh_medico(CBO), "MEDICA", "MULTIPROFISSIONAL")]
 
   # Partos (AIH normais, todos os estabelecimentos de PE)

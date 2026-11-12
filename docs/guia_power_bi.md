@@ -67,7 +67,8 @@ in
 ```
 
 `TIPO_ATENDIMENTO` separa CONSULTA (consultas ambulatoriais, 030101) de URGENCIA
-(atendimentos de urgência, 030106).
+(atendimentos de urgência, 030106) e, só nos hospitais, INTERNACAO (atos
+profissionais da AIH, SIH-SP, pelo CBO de quem fez o ato; a quantidade é de atos).
 
 Se você já tinha criado as consultas lendo `.parquet`, abra o *Editor Avançado* de
 cada uma e troque pelo código acima. Os nomes das colunas são os mesmos, então
