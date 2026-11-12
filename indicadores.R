@@ -8,7 +8,7 @@
 #                              BASE_MUNICIPIO (ATENDIMENTO/RESIDENCIA), INDICADOR, VALOR,
 #                              CO_MUNICIPIO_RES (residência do paciente; só partos,
 #                              eletivas e exames, vazio nos demais)
-#   especialidades.{parquet,csv} CBO com produção de consultas em UPAE/UPA, por mês
+#   especialidades.{parquet,csv} CBO com produção de consultas em hospitais, UPAE e UPA, por mês
 #   dim_indicador.csv          nome, seção e regra de cada indicador
 #   dim_estabelecimento.csv    lista validada com código de município, mais os demais
 #                              estabelecimentos de PE presentes nos indicadores (VINCULO OUTROS_PE)
@@ -42,7 +42,7 @@ TIPOS_CNES <- c("01" = "Posto de saúde", "02" = "Centro de saúde/Unidade bási
                 "61" = "Centro de parto normal", "70" = "Centro de Atenção Psicossocial",
                 "73" = "Pronto atendimento", "83" = "Polo de prevenção e promoção da saúde")
 
-# Procedimentos de consulta/atendimento (grupo 0301) usados em UPAE e UPA.
+# Procedimentos de consulta/atendimento (grupo 0301) usados em hospitais, UPAE e UPA.
 # Médico ou não médico é decidido pelo CBO do profissional.
 CONSULTAS <- c(
   "0301010072",  # consulta médica em atenção especializada
@@ -208,8 +208,8 @@ main <- function() {
   out[[length(out) + 1]] <- linha(proc_h[startsWith(PA_PROC_ID, "030401"), .(VALOR = sum(VALOR)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO)], "PROC_RADIOTERAPIA")
   out[[length(out) + 1]] <- linha(proc_h[startsWith(PA_PROC_ID, "030501"), .(VALOR = sum(VALOR)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO)], "PROC_HEMODIALISE")
 
-  # Consultas em UPAE e UPA
-  cons <- sia[CNES %chin% estab[TIPO %chin% c("UPAE", "UPA")]$CNES & PA_PROC_ID %chin% CONSULTAS]
+  # Consultas em hospitais, UPAE e UPA (por CBO do profissional)
+  cons <- sia[CNES %chin% estab[TIPO %chin% c("HOSPITAL", "UPAE", "UPA")]$CNES & PA_PROC_ID %chin% CONSULTAS]
   out[[length(out) + 1]] <- linha(cons[eh_medico(CBO), .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO)], "CONSULTAS_MEDICAS")
   out[[length(out) + 1]] <- linha(cons[eh_superior_nao_medico(CBO), .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO)], "CONSULTAS_NIVEL_SUPERIOR_NAO_MEDICO")
   out[[length(out) + 1]] <- linha(cons[eh_medico(CBO) | eh_superior_nao_medico(CBO), .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO)], "CONSULTAS_TOTAL")

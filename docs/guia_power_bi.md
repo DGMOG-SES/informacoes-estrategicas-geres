@@ -48,7 +48,7 @@ in
     Data
 ```
 
-### f_Especialidades (CBO com consultas em UPAE e UPA)
+### f_Especialidades (CBO com consultas em hospitais, UPAE e UPA)
 
 ```powerquery
 let
