@@ -57,13 +57,17 @@ let
     Cab = Table.PromoteHeaders(Fonte, [PromoteAllScalars = true]),
     Tipos = Table.TransformColumnTypes(Cab, {
         {"CBO", type text}, {"COMPETENCIA", type text}, {"CNES", type text},
-        {"QTD_APROVADA", type number}, {"CATEGORIA", type text}, {"NO_OCUPACAO", type text}}, "en-US"),
+        {"QTD_APROVADA", type number}, {"CATEGORIA", type text}, {"NO_OCUPACAO", type text},
+        {"TIPO_ATENDIMENTO", type text}}, "en-US"),
     Data = Table.AddColumn(Tipos, "Data",
         each #date(Number.From(Text.Start([COMPETENCIA], 4)), Number.From(Text.End([COMPETENCIA], 2)), 1),
         type date)
 in
     Data
 ```
+
+`TIPO_ATENDIMENTO` separa CONSULTA (consultas ambulatoriais, 030101) de URGENCIA
+(atendimentos de urgência, 030106).
 
 Se você já tinha criado as consultas lendo `.parquet`, abra o *Editor Avançado* de
 cada uma e troque pelo código acima. Os nomes das colunas são os mesmos, então

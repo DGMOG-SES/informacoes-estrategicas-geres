@@ -216,7 +216,8 @@ main <- function() {
   out[[length(out) + 1]] <- linha(sia[CNES %chin% estab[TIPO %chin% c("UPAE", "UPA")]$CNES & PA_PROC_ID == "0301060118",
                                       .(VALOR = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CO_MUNICIPIO)], "ACOLHIMENTO_CLASSIFICACAO_RISCO")
   esp <- cons[eh_medico(CBO) | eh_superior_nao_medico(CBO),
-              .(QTD_APROVADA = sum(QTD_APROVADA)), by = .(COMPETENCIA, CNES, CBO)]
+              .(QTD_APROVADA = sum(QTD_APROVADA)),
+              by = .(COMPETENCIA, CNES, CBO, TIPO_ATENDIMENTO = fifelse(startsWith(PA_PROC_ID, "030106"), "URGENCIA", "CONSULTA"))]
   esp[, CATEGORIA := fifelse(eh_medico(CBO), "MEDICA", "MULTIPROFISSIONAL")]
 
   # Partos (AIH normais, todos os estabelecimentos de PE)
