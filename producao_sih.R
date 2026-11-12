@@ -7,13 +7,13 @@
 #     AIH reduzida (RD) de todos os estabelecimentos de PE: contagem de AIH por
 #     competência (ANO_CMPT/MES_CMPT), CNES, município do estabelecimento
 #     (MUNIC_MOV), município de residência (MUNIC_RES), procedimento realizado
-#     (PROC_REA), caráter da internação (CAR_INT) e tipo de AIH (IDENT:
+#     (PROC_REA), especialidade do leito (ESPEC), caráter da internação (CAR_INT) e tipo de AIH (IDENT:
 #     1 = normal, 5 = longa permanência). Serve para partos, cirurgias eletivas
 #     e internações por GERES de atendimento e de residência.
 #   dados/sih/servicos/  -> dados/saida/sih_servicos.parquet
 #     Atos profissionais (SP) das unidades da lista validada: quantidade
 #     (SP_QTD_ATO) e linhas por competência, CNES e procedimento do ato
-#     (SP_ATOPROF). Inclui OPM e exames feitos durante a internação.
+#     (SP_ATOPROF) e CBO do profissional (SP_PF_CBO). Inclui OPM e exames feitos durante a internação.
 #
 # Só baixa meses novos ou republicados. Uso: Rscript producao_sih.R [--reprocessar-tudo]
 # ------------------------------------------------------------------------------
@@ -53,24 +53,24 @@ baixar_ler_sih <- function(nome) {
 
 processar_rd <- function(nome) {
   rd <- baixar_ler_sih(nome)
-  cols <- c("ANO_CMPT", "MES_CMPT", "CNES", "MUNIC_MOV", "MUNIC_RES", "PROC_REA", "CAR_INT", "IDENT")
+  cols <- c("ANO_CMPT", "MES_CMPT", "CNES", "MUNIC_MOV", "MUNIC_RES", "PROC_REA", "CAR_INT", "IDENT", "ESPEC")
   rd <- rd[, cols, with = FALSE]
   for (cl in cols) set(rd, j = cl, value = trimws(as.character(rd[[cl]])))
   out <- rd[, .(N_AIH = .N), by = .(COMPETENCIA = paste0(ANO_CMPT, MES_CMPT), CNES, MUNIC_MOV,
-                                    MUNIC_RES, PROC_REA, CAR_INT, IDENT)]
+                                    MUNIC_RES, PROC_REA, CAR_INT, IDENT, ESPEC)]
   log_msg("  %s: %s AIH, %d linhas agregadas", nome, format(nrow(rd), big.mark = "."), nrow(out))
   out
 }
 
 processar_sp <- function(nome, cnes_validos) {
   sp <- baixar_ler_sih(nome)
-  cols <- c("SP_AA", "SP_MM", "SP_CNES", "SP_ATOPROF", "SP_QTD_ATO")
+  cols <- c("SP_AA", "SP_MM", "SP_CNES", "SP_ATOPROF", "SP_PF_CBO", "SP_QTD_ATO")
   sp <- sp[, cols, with = FALSE]
-  for (cl in cols[1:4]) set(sp, j = cl, value = trimws(as.character(sp[[cl]])))
+  for (cl in cols[1:5]) set(sp, j = cl, value = trimws(as.character(sp[[cl]])))
   n <- nrow(sp)
   sp <- sp[SP_CNES %chin% cnes_validos]
   out <- sp[, .(QTD_ATO = sum(as.numeric(SP_QTD_ATO), na.rm = TRUE), N_LINHAS = .N),
-            by = .(COMPETENCIA = paste0(SP_AA, SP_MM), CNES = SP_CNES, PROC_ATO = SP_ATOPROF)]
+            by = .(COMPETENCIA = paste0(SP_AA, SP_MM), CNES = SP_CNES, PROC_ATO = SP_ATOPROF, CBO = SP_PF_CBO)]
   log_msg("  %s: %s atos, %d linhas agregadas das unidades validadas", nome, format(n, big.mark = "."), nrow(out))
   out
 }
@@ -78,7 +78,7 @@ processar_sp <- function(nome, cnes_validos) {
 consolidar <- function(sub, saida) {
   arqs <- list.files(file.path(SIH$dir, sub), "\\.parquet$", full.names = TRUE)
   if (!length(arqs)) return(invisible(NULL))
-  base <- rbindlist(lapply(arqs, arrow::read_parquet), use.names = TRUE)
+  base <- rbindlist(lapply(arqs, arrow::read_parquet), use.names = TRUE, fill = TRUE)
   dir.create(file.path(CFG$dir_dados, "saida"), recursive = TRUE, showWarnings = FALSE)
   gravar_atomico(function(f) arrow::write_parquet(base, f), file.path(CFG$dir_dados, "saida", saida))
   log_msg("%s: %d linhas", saida, nrow(base))
