@@ -53,6 +53,8 @@ CONSULTAS <- c(
   "0301060029",  # atendimento de urgência c/ observação até 24 h em atenção especializada
   "0301060061"   # atendimento de urgência em atenção especializada
 )
+# CNES que funcionam também como UPA (decisão da SES, 13/11/2026).
+DESDOBRAR_UPA <- data.table(CNES = "7297394", NOME = "UPA PETROLINA (UPAE DR EMANUEL ALIRIO BRANDAO)")
 eh_medico <- function(cbo) startsWith(cbo, "225") | startsWith(cbo, "2231")
 eh_superior_nao_medico <- function(cbo) startsWith(cbo, "2") & !eh_medico(cbo) & nchar(cbo) == 6
 
@@ -168,6 +170,13 @@ main <- function() {
   cand <- fread(file.path(CFG$dir_dados, "referencias", "cnes_candidatos.csv"),
                 colClasses = "character", encoding = "UTF-8")
   estab <- merge(estab, cand[, .(CNES, CO_MUNICIPIO = CODUFMUN)], by = "CNES", all.x = TRUE)
+  # Unidades com um CNES e dois perfis: a urgência (SIGTAP 030106) vira uma unidade UPA à parte,
+  # com código próprio (CNES + "U"); o restante fica na unidade original.
+  for (i in seq_len(nrow(DESDOBRAR_UPA))) {
+    v <- copy(estab[CNES == DESDOBRAR_UPA$CNES[i]])
+    v[, `:=`(CNES = paste0(CNES, "U"), NOME_FANTASIA = DESDOBRAR_UPA$NOME[i], TIPO = "UPA")]
+    estab <- rbind(estab, v)
+  }
   rede <- estab[VINCULO != "REFERENCIA_FORA_DA_REDE"]
   hosp <- estab[TIPO == "HOSPITAL"]$CNES
   mun_cnes <- estab[, .(CNES, CO_MUNICIPIO)]
@@ -186,6 +195,7 @@ main <- function() {
 
   # SIA das unidades validadas
   sia <- ler_pq("sia_estabelecimentos.parquet")
+  sia[CNES %chin% DESDOBRAR_UPA$CNES & startsWith(PA_PROC_ID, "030106"), CNES := paste0(CNES, "U")]
   sia <- merge(sia, mun_cnes, by = "CNES")
   sia[, `:=`(COMPETENCIA = PA_MVM, GRUPO = substr(PA_PROC_ID, 1, 2))]
 
