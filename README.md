@@ -15,7 +15,7 @@ de Saúde de PE. Os dados vêm do FTP do DATASUS e são atualizados pelo GitHub 
 | `dados/saida/atualizacao.csv` | Último mês de cada fonte (CNES, SIA, SIH) e data e hora (Recife) em que a base mudou pela última vez |
 | `utils.R` | Funções comuns (FTP, leitura de .dbc, gravação) |
 | `referencias/municipios_regiao_saude_pe.csv` | Município → Região de Saúde/GERES |
-| `referencias/estabelecimentos_validados.csv` | **Lista oficial validada pela SES (16/10/2026)**. Os indicadores de "hospitais da rede própria" usam REDE_PROPRIA_ESTADUAL + ESTADUAL_ADM_INDIRETA: CNES, tipo (HOSPITAL/UPAE/UPA) e vínculo (REDE_PROPRIA_ESTADUAL, ESTADUAL_ADM_INDIRETA, REFERENCIA_FORA_DA_REDE). Editar este arquivo para incluir ou retirar unidades. |
+| `referencias/estabelecimentos_validados.csv` | **Lista oficial validada pela SES (16/10/2026)**. Os indicadores de "hospitais da rede própria" usam REDE_PROPRIA_ESTADUAL + ESTADUAL_ADM_INDIRETA: CNES, tipo (HOSPITAL/UPAE/UPA) e vínculo (REDE_PROPRIA_ESTADUAL, ESTADUAL_ADM_INDIRETA, REFERENCIA_FORA_DA_REDE) e modelo de gestão (MODELO_GESTAO: 06 grandes, Gestão direta, OSS, Administração indireta, Desativado; validado pela SES em 13/11/2026). Editar este arquivo para incluir ou retirar unidades. |
 | `dados/referencias/cnes_candidatos.csv` | Lista candidata (para validação da SES) |
 | `dados/referencias/cnes_nomes_pe.csv` | Cache de nome e tipo (API de dados abertos do CNES) dos estabelecimentos de PE fora da lista validada, usado na `dim_estabelecimento.csv` |
 | `dados/referencias/leitos_pe.csv` | Leitos de PE por CNES e código de leito (QT_EXIST, QT_CONTR, QT_SUS, QT_NSUS) |

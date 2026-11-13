@@ -54,7 +54,7 @@ CONSULTAS <- c(
   "0301060061"   # atendimento de urgência em atenção especializada
 )
 # CNES que funcionam também como UPA (decisão da SES, 13/11/2026).
-DESDOBRAR_UPA <- data.table(CNES = "7297394", NOME = "UPA PETROLINA (UPAE DR EMANUEL ALIRIO BRANDAO)")
+DESDOBRAR_UPA <- data.table(CNES = "7297394", NOME = "UPA PETROLINA")
 eh_medico <- function(cbo) startsWith(cbo, "225") | startsWith(cbo, "2231")
 eh_superior_nao_medico <- function(cbo) startsWith(cbo, "2") & !eh_medico(cbo) & nchar(cbo) == 6
 
@@ -295,7 +295,7 @@ main <- function() {
   outros <- merge(outros, nomes, by = "CNES", all.x = TRUE)
   outros <- merge(outros, mun[, .(CO_MUNICIPIO, MUNICIPIO, REGIAO_SAUDE)], by = "CO_MUNICIPIO", all.x = TRUE)
   outros[, `:=`(NOME_FANTASIA = fifelse(is.na(NOME_FANTASIA) | NOME_FANTASIA == "", paste("CNES", CNES), NOME_FANTASIA),
-                TIPO = "OUTRO", VINCULO = "OUTROS_PE", OBSERVACAO_SES = "",
+                TIPO = "OUTRO", VINCULO = "OUTROS_PE", OBSERVACAO_SES = "", MODELO_GESTAO = "Outros de PE",
                 TIPO_CNES = fcoalesce(unname(TIPOS_CNES[CO_TIPO_UNIDADE]), fifelse(is.na(CO_TIPO_UNIDADE), "Não informado", paste("Outro tipo", CO_TIPO_UNIDADE))))]
   estab[, TIPO_CNES := fcase(TIPO == "HOSPITAL", "Hospital", TIPO == "UPAE", "UPAE", TIPO == "UPA", "UPA", default = "Outro")]
   dim_estab <- rbind(estab, outros[, names(estab), with = FALSE])
