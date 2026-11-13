@@ -6,7 +6,8 @@
 # Saídas (Parquet), uma partição por movimento e uma base consolidada:
 #   dados/sia/estabelecimentos/  -> dados/saida/sia_estabelecimentos.parquet
 #     Unidades de referencias/estabelecimentos_validados.csv, por
-#     PA_MVM, PA_CMP, CNES, PA_PROC_ID e CBO. O CBO só é mantido nos
+#     PA_MVM, PA_CMP, CNES, PA_PROC_ID, CBO, PA_MUNPCN (residência do paciente) e
+#     PA_DOCORIG (instrumento: BPA-C, BPA-I, APAC). O CBO só é mantido nos
 #     procedimentos 0301 (consultas e atendimentos); nos demais fica vazio.
 #   dados/sia/exames/            -> dados/saida/sia_exames_pe.parquet
 #     Todos os estabelecimentos de PE, só TC (0206), RNM (0207) e densitometria
@@ -33,7 +34,7 @@ SIA <- list(
 )
 
 COLS <- c("PA_CODUNI", "PA_CMP", "PA_MVM", "PA_UFMUN", "PA_PROC_ID", "PA_CBOCOD",
-          "PA_MUNPCN", "PA_QTDAPR", "PA_QTDPRO")
+          "PA_MUNPCN", "PA_DOCORIG", "PA_QTDAPR", "PA_QTDPRO")
 
 listar_sia <- function() {
   res <- com_tentativas(function() curl_fetch_memory(SIA$ftp, handle = novo_handle()), "listar SIA")
@@ -55,7 +56,7 @@ ler_parte <- function(nome, mvm, cnes_validos) {
   on.exit(unlink(destino))
   dt <- ler_arquivo(destino)
   if (!"PA_MVM" %in% names(dt)) dt[, PA_MVM := mvm]
-  for (cl in c("PA_CBOCOD", "PA_MUNPCN")) if (!cl %in% names(dt)) set(dt, j = cl, value = NA_character_)
+  for (cl in c("PA_CBOCOD", "PA_MUNPCN", "PA_DOCORIG")) if (!cl %in% names(dt)) set(dt, j = cl, value = NA_character_)
   dt <- dt[, intersect(COLS, names(dt)), with = FALSE]
   for (cl in setdiff(COLS, c("PA_QTDAPR", "PA_QTDPRO"))) set(dt, j = cl, value = trimws(as.character(dt[[cl]])))
   dt[, `:=`(PA_QTDAPR = as.numeric(PA_QTDAPR), PA_QTDPRO = as.numeric(PA_QTDPRO))]
@@ -65,7 +66,7 @@ ler_parte <- function(nome, mvm, cnes_validos) {
   estab[!startsWith(PA_PROC_ID, "0301"), PA_CBOCOD := ""]
   estab <- estab[, .(QTD_APROVADA = sum(PA_QTDAPR, na.rm = TRUE),
                      QTD_APRESENTADA = sum(PA_QTDPRO, na.rm = TRUE)),
-                 by = .(PA_MVM, PA_CMP, CNES = PA_CODUNI, PA_PROC_ID, CBO = PA_CBOCOD)]
+                 by = .(PA_MVM, PA_CMP, CNES = PA_CODUNI, PA_PROC_ID, CBO = PA_CBOCOD, PA_MUNPCN, PA_DOCORIG)]
 
   ex <- dt[Reduce(`|`, lapply(SIA$exames, function(p) startsWith(PA_PROC_ID, p)))]
   ex <- ex[, .(QTD_APROVADA = sum(PA_QTDAPR, na.rm = TRUE),
@@ -113,7 +114,7 @@ main <- function() {
     log_msg("Movimento %s", m)
     ok <- tryCatch({
       partes <- lapply(ftp[mvm == m]$nome, ler_parte, mvm = m, cnes_validos = cnes_validos)
-      estab <- somar(rbindlist(lapply(partes, `[[`, "estab")), c("PA_MVM", "PA_CMP", "CNES", "PA_PROC_ID", "CBO"))
+      estab <- somar(rbindlist(lapply(partes, `[[`, "estab")), c("PA_MVM", "PA_CMP", "CNES", "PA_PROC_ID", "CBO", "PA_MUNPCN", "PA_DOCORIG"))
       ex <- somar(rbindlist(lapply(partes, `[[`, "exames")), c("PA_MVM", "PA_CMP", "CNES", "PA_UFMUN", "PA_MUNPCN", "PA_PROC_ID"))
       gravar_atomico(function(f) arrow::write_parquet(estab, f),
                      file.path(SIA$dir, "estabelecimentos", sprintf("sia_estab_%s.parquet", m)))
